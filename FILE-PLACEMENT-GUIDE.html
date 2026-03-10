@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>File Placement Guide — UST-Legazpi Faculty Evaluation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold:   #F5A623;
+    --gold-d: #C8850A;
+    --gold-dim: rgba(245,166,35,0.10);
+    --gold-border: rgba(245,166,35,0.22);
+    --bg:     #0D0B06;
+    --surface:#181408;
+    --elev:   #211C0C;
+    --text:   #F5EDD6;
+    --muted:  #A8956A;
+    --dim:    #5A4E36;
+    --success:#4CAF6F;
+    --danger: #E05252;
+    --border: rgba(245,166,35,0.10);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:14px; line-height:1.6; padding:0; min-height:100vh; }
+
+  .page { max-width:900px; margin:0 auto; padding:40px 28px 60px; }
+
+  /* Header */
+  .hero { text-align:center; margin-bottom:48px; }
+  .hero .badge { display:inline-flex; align-items:center; gap:8px; background:var(--gold-dim);
+    border:1px solid var(--gold-border); border-radius:99px; padding:5px 16px;
+    font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.06em;
+    text-transform:uppercase; margin-bottom:16px; }
+  .hero h1 { font-family:'Fraunces',serif; font-size:30px; font-weight:700; margin-bottom:8px; }
+  .hero p  { font-size:14px; color:var(--muted); }
+
+  /* Section */
+  .section { margin-bottom:40px; }
+  .section-title { font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--dim); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+
+  /* Credential cards */
+  .creds { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:40px; }
+  .cred-card { background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:18px; text-align:center; }
+  .cred-card .role { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:10px; }
+  .cred-card .avatar { width:44px; height:44px; border-radius:12px; margin:0 auto 12px;
+    background:linear-gradient(135deg,#F5A623,#C8850A); display:flex; align-items:center;
+    justify-content:center; font-size:18px; font-weight:700; color:#0D0B06; font-family:'Fraunces',serif; }
+  .cred-field { background:var(--elev); border:1px solid var(--border); border-radius:6px;
+    padding:6px 12px; margin-bottom:6px; display:flex; justify-content:space-between; }
+  .cred-field .label { font-size:10px; color:var(--dim); font-weight:700; letter-spacing:0.05em;
+    text-transform:uppercase; }
+  .cred-field .val   { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold); font-weight:600; }
+  .dest { font-size:11px; color:var(--muted); margin-top:8px; }
+
+  /* Folder tree */
+  .tree { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .tree-header { padding:14px 20px; background:var(--elev); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px; }
+  .tree-header .dots { display:flex; gap:6px; }
+  .tree-header .dot { width:11px; height:11px; border-radius:50%; }
+  .tree-header .title { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--muted); }
+  .tree-body { padding:20px 24px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.9; }
+
+  .folder { color:var(--gold); font-weight:600; }
+  .file   { color:var(--text); }
+  .file.new { color:#4CAF6F; }
+  .file.updated { color:#F5A623; }
+  .comment { color:var(--dim); font-size:11px; margin-left:6px; }
+
+  .indent1 { padding-left:20px; }
+  .indent2 { padding-left:40px; }
+  .indent3 { padding-left:60px; }
+  .indent4 { padding-left:80px; }
+
+  /* File table */
+  .file-table { width:100%; border-collapse:collapse; }
+  .file-table th { text-align:left; font-size:10px; font-weight:700; letter-spacing:0.07em;
+    text-transform:uppercase; color:var(--dim); padding:8px 14px;
+    border-bottom:1px solid var(--border); background:var(--elev); }
+  .file-table td { padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .file-table tr:last-child td { border-bottom:none; }
+  .file-table tr:hover td { background:var(--elev); }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px;
+    font-weight:700; letter-spacing:0.04em; }
+  .tag-new     { background:rgba(76,175,111,0.12); color:#4CAF6F; border:1px solid rgba(76,175,111,0.25); }
+  .tag-update  { background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-border); }
+  .tag-keep    { background:rgba(255,255,255,0.04); color:var(--dim); border:1px solid var(--border); }
+
+  .mono { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold); }
+  .note { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* Steps */
+  .steps { counter-reset:step; }
+  .step  { display:flex; gap:16px; margin-bottom:18px; align-items:flex-start; }
+  .step-num { width:30px; height:30px; border-radius:8px; background:var(--gold-dim);
+    border:1px solid var(--gold-border); display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:var(--gold); flex-shrink:0; }
+  .step-body h4 { font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .step-body p  { font-size:13px; color:var(--muted); line-height:1.6; }
+  .cmd { display:inline-block; background:var(--elev); border:1px solid var(--border);
+    border-radius:5px; padding:2px 9px; font-family:'JetBrains Mono',monospace;
+    font-size:12px; color:var(--gold); margin:4px 0; }
+
+  /* Color palette */
+  .palette { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+  .swatch { border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+  .swatch-color { height:56px; }
+  .swatch-info  { padding:10px 12px; background:var(--surface); }
+  .swatch-name  { font-size:12px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .swatch-hex   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+
+  .legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+  .legend-dot  { width:10px; height:10px; border-radius:3px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="badge">📁 Developer Guide</div>
+    <h1>File Placement Guide</h1>
+    <p>UST-Legazpi Faculty Performance Evaluation System · v1.0</p>
+  </div>
+
+  <!-- Login Credentials -->
+  <div class="section">
+    <p class="section-title">Mock Login Credentials</p>
+    <div class="creds">
+      <div class="cred-card">
+        <p class="role">Student</p>
+        <div class="avatar">M</div>
+        <div class="cred-field"><span class="label">ID</span><span class="val">student</span></div>
+        <div class="cred-field"><span class="label">Pass</span><span class="val">123</span></div>
+        <p class="dest">→ Evaluate Faculty + Submissions</p>
+      </div>
+      <div class="cred-card">
+        <p class="role">Chairperson</p>
+        <div class="avatar">A</div>
+        <div class="cred-field"><span class="label">ID</span><span class="val">chairperson</span></div>
+        <div class="cred-field"><span class="label">Pass</span><span class="val">123</span></div>
+        <p class="dest">→ Overview + Eval + AI Reports</p>
+      </div>
+      <div class="cred-card">
+        <p class="role">HR Officer</p>
+        <div class="avatar">J</div>
+        <div class="cred-field"><span class="label">ID</span><span class="val">hr</span></div>
+        <div class="cred-field"><span class="label">Pass</span><span class="val">123</span></div>
+        <p class="dest">→ Overview + Reports + Audit Log</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Folder Tree -->
+  <div class="section">
+    <p class="section-title">Folder Structure — Where Every File Goes</p>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4CAF6F"></div> New or replaced file</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div> Updated file</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5A4E36; border:1px solid #5A4E36"></div> Keep as-is</div>
+    </div>
+
+    <div class="tree">
+      <div class="tree-header">
+        <div class="dots">
+          <div class="dot" style="background:#E05252"></div>
+          <div class="dot" style="background:#F5A623"></div>
+          <div class="dot" style="background:#4CAF6F"></div>
+        </div>
+        <span class="title">eval-system/</span>
+      </div>
+      <div class="tree-body">
+
+        <div><span class="folder">📁 eval-system/</span> <span class="comment">← your root project folder</span></div>
+
+        <div class="indent1"><span class="folder">📁 node_modules/</span> <span class="comment">← auto-generated, do not touch</span></div>
+
+        <div class="indent1"><span class="folder">📁 src/</span> <span class="comment">← all source code lives here</span></div>
+
+        <div class="indent2"><span class="folder">📁 components/</span></div>
+
+        <div class="indent3"><span class="folder">📁 layout/</span></div>
+        <div class="indent4"><span class="file updated">📄 Sidebar.jsx</span> <span class="comment">← updated</span></div>
+        <div class="indent4"><span class="file updated">📄 Header.jsx</span> <span class="comment">← updated</span></div>
+        <div class="indent4"><span class="file">📄 Footer.jsx</span></div>
+
+        <div class="indent3"><span class="folder">📁 ui/</span></div>
+        <div class="indent4"><span class="file">📄 Badge.jsx</span></div>
+        <div class="indent4"><span class="file">📄 Card.jsx</span></div>
+        <div class="indent4"><span class="file">📄 ScoreBar.jsx</span></div>
+        <div class="indent4"><span class="file">📄 StarRating.jsx</span></div>
+
+        <div class="indent2"><span class="folder">📁 data/</span></div>
+        <div class="indent3"><span class="file">📄 mockData.js</span></div>
+
+        <div class="indent2"><span class="folder">📁 pages/</span></div>
+        <div class="indent3"><span class="file new">📄 Login.jsx</span> <span class="comment">← new / replace old</span></div>
+        <div class="indent3"><span class="file new">📄 StudentView.jsx</span> <span class="comment">← new role page</span></div>
+        <div class="indent3"><span class="file new">📄 ChairView.jsx</span> <span class="comment">← new role page</span></div>
+        <div class="indent3"><span class="file new">📄 HRView.jsx</span> <span class="comment">← new role page</span></div>
+
+        <div class="indent2"><span class="folder">📁 styles/</span></div>
+        <div class="indent3"><span class="file updated">📄 global.css</span> <span class="comment">← UST brand colors applied here</span></div>
+        <div class="indent3"><span class="file">📄 theme.js</span></div>
+
+        <div class="indent2"><span class="file updated">📄 App.jsx</span> <span class="comment">← updated (auth + routing)</span></div>
+        <div class="indent2"><span class="file">📄 main.jsx</span></div>
+
+        <div class="indent1"><span class="file updated">📄 index.html</span> <span class="comment">← must be here, NOT inside public/</span></div>
+        <div class="indent1"><span class="file">📄 package.json</span></div>
+        <div class="indent1"><span class="file">📄 vite.config.js</span></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- File table -->
+  <div class="section">
+    <p class="section-title">File-by-File Instructions</p>
+    <div class="tree" style="border-radius:16px; overflow:hidden;">
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Exact path inside eval-system/</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">global.css</span></td>
+            <td><span class="mono">src/styles/global.css</span></td>
+            <td><span class="tag tag-update">Replace</span><p class="note">UST Gold + Black brand colors</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Login.jsx</span></td>
+            <td><span class="mono">src/pages/Login.jsx</span></td>
+            <td><span class="tag tag-new">New</span><p class="note">Full-screen login with circular SVG badge</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">StudentView.jsx</span></td>
+            <td><span class="mono">src/pages/StudentView.jsx</span></td>
+            <td><span class="tag tag-new">New</span><p class="note">Browse faculty, submit eval, history</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">ChairView.jsx</span></td>
+            <td><span class="mono">src/pages/ChairView.jsx</span></td>
+            <td><span class="tag tag-new">New</span><p class="note">Dept overview, chair eval form, AI feedback</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">HRView.jsx</span></td>
+            <td><span class="mono">src/pages/HRView.jsx</span></td>
+            <td><span class="tag tag-new">New</span><p class="note">All dept overview, reports, audit log</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Sidebar.jsx</span></td>
+            <td><span class="mono">src/components/layout/Sidebar.jsx</span></td>
+            <td><span class="tag tag-update">Replace</span><p class="note">UST brand colors, role-aware nav</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Header.jsx</span></td>
+            <td><span class="mono">src/components/layout/Header.jsx</span></td>
+            <td><span class="tag tag-update">Replace</span><p class="note">UST colors, theme toggle</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">App.jsx</span></td>
+            <td><span class="mono">src/App.jsx</span></td>
+            <td><span class="tag tag-update">Replace</span><p class="note">Auth state + role routing</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">mockData.js</span></td>
+            <td><span class="mono">src/data/mockData.js</span></td>
+            <td><span class="tag tag-update">Replace</span><p class="note">All dept + CS faculty data + users</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">index.html</span></td>
+            <td><span class="mono">index.html</span> <strong>(root!)</strong></td>
+            <td><span class="tag tag-keep">Keep/Check</span><p class="note">Must be at root, not inside public/</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Badge.jsx</span><br/><span class="mono">Card.jsx</span><br/><span class="mono">ScoreBar.jsx</span><br/><span class="mono">StarRating.jsx</span></td>
+            <td><span class="mono">src/components/ui/</span></td>
+            <td><span class="tag tag-keep">Keep</span><p class="note">No changes needed</p></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Footer.jsx</span></td>
+            <td><span class="mono">src/components/layout/Footer.jsx</span></td>
+            <td><span class="tag tag-keep">Keep</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">main.jsx</span></td>
+            <td><span class="mono">src/main.jsx</span></td>
+            <td><span class="tag tag-keep">Keep</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">package.json</span><br/><span class="mono">vite.config.js</span></td>
+            <td><span class="mono">root</span></td>
+            <td><span class="tag tag-keep">Keep</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- UST Color Palette -->
+  <div class="section">
+    <p class="section-title">UST-Legazpi Brand Colors Applied</p>
+    <div class="palette">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F5A623"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Thomasian Gold</p>
+          <p class="swatch-hex">#F5A623 · Primary</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#C8850A"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Deep Gold</p>
+          <p class="swatch-hex">#C8850A · Hover states</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0D0B06; border:1px solid rgba(245,166,35,0.2)"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Dominican Black</p>
+          <p class="swatch-hex">#0D0B06 · Dark bg base</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#181408"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Warm Surface</p>
+          <p class="swatch-hex">#181408 · Cards</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F5EDD6"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Cream Text</p>
+          <p class="swatch-hex">#F5EDD6 · Primary text</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FDFAF3"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">Cream Base (Light)</p>
+          <p class="swatch-hex">#FDFAF3 · Light mode bg</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="section">
+    <p class="section-title">How to Apply the Updates</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Stop the dev server</h4>
+          <p>Press <span class="cmd">Ctrl + C</span> in your terminal to stop <span class="cmd">npm run dev</span>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Replace files by their exact path</h4>
+          <p>For each file in the table above, open the matching file in VS Code and paste the new content — or drag-and-drop the downloaded file into the correct subfolder shown.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Add the 4 new page files</h4>
+          <p>Create <span class="cmd">src/pages/</span> if it does not exist. Place <span class="cmd">Login.jsx</span>, <span class="cmd">StudentView.jsx</span>, <span class="cmd">ChairView.jsx</span>, and <span class="cmd">HRView.jsx</span> inside it. Delete <span class="cmd">Dashboard.jsx</span>, <span class="cmd">AdminView.jsx</span>, and <span class="cmd">About.jsx</span> — they are no longer used.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Restart the dev server</h4>
+          <p>Run <span class="cmd">npm run dev</span> and open <span class="cmd">http://localhost:5173</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#5A4E36;margin-top:20px;">
+    UST-Legazpi Faculty Performance Evaluation System · BSCS 3G · February 2026
+  </p>
+</div>
+</body>
+</html>
