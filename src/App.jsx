@@ -1,90 +1,77 @@
-/**
- * App.jsx
- * Root component. Manages authentication state, theme, and role-based routing.
- */
 import { useState, useEffect } from "react";
-import Login    from "./pages/Login.jsx";
+import Login       from "./pages/Login.jsx";
 import StudentView from "./pages/StudentView.jsx";
 import ChairView   from "./pages/ChairView.jsx";
 import HRView      from "./pages/HRView.jsx";
-import Sidebar  from "./components/layout/Sidebar.jsx";
-import Header   from "./components/layout/Header.jsx";
-import Footer   from "./components/layout/Footer.jsx";
+import Sidebar     from "./components/layout/Sidebar.jsx";
+import Header      from "./components/layout/Header.jsx";
+import Footer      from "./components/layout/Footer.jsx";
 
-/* Role → default tab mapping */
 const defaultTab = { student:"evaluate", chairperson:"overview", hr:"overview" };
 
 export default function App() {
-  const [user,    setUser]    = useState(null);
-  const [tab,     setTab]     = useState("");
-  const [isDark,  setIsDark]  = useState(true);
+  const [user,       setUser]       = useState(null);
+  const [tab,        setTab]        = useState("");
+  const [isDark,     setIsDark]     = useState(false);   // light mode default
+  const [sideOpen,   setSideOpen]   = useState(false);
 
-  /* Apply dark/light class to <html> */
+  // Apply light/dark class
   useEffect(() => {
     document.documentElement.classList.toggle("light", !isDark);
   }, [isDark]);
 
-  const handleLogin = (u) => {
-    setUser(u);
-    setTab(defaultTab[u.role] || "overview");
-  };
+  // Close sidebar on desktop resize
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 768) setSideOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
-  const handleLogout = () => {
-    setUser(null);
-    setTab("");
-  };
+  const login  = (u) => { setUser(u); setTab(defaultTab[u.role] || "overview"); };
+  const logout = ()  => { setUser(null); setTab(""); setSideOpen(false); };
+  const nav    = (k) => { setTab(k); setSideOpen(false); };
 
-  /* Page content by role */
-  const PageContent = () => {
-    if (!user) return null;
-    if (user.role === "student")     return <StudentView />;
-    if (user.role === "chairperson") return <ChairView />;
-    if (user.role === "hr")          return <HRView />;
-    return null;
-  };
-
-  /* Login screen */
+  // Login screen (no sidebar)
   if (!user) {
     return (
       <>
-        <Login onLogin={handleLogin} isDark={isDark} />
-        {/* Small theme toggle on login */}
+        <Login onLogin={login} isDark={isDark}/>
         <button
           onClick={() => setIsDark(d => !d)}
-          style={{ position:"fixed", top:"16px", right:"16px", width:"36px", height:"36px",
-            borderRadius:"var(--radius-sm)", background:"rgba(255,255,255,0.08)",
-            border:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.6)",
-            fontSize:"16px", display:"flex", alignItems:"center", justifyContent:"center",
-            cursor:"pointer", zIndex:100 }}
-          title="Toggle theme"
-        >
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{ position:"fixed", top:"16px", right:"16px", width:"38px", height:"38px",
+            borderRadius:"var(--radius-sm)",
+            background: isDark ? "rgba(245,166,35,0.15)" : "rgba(0,0,0,0.20)",
+            border: isDark ? "1px solid rgba(245,166,35,0.40)" : "1px solid rgba(0,0,0,0.20)",
+            fontSize:"17px",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            cursor:"pointer", zIndex:100,
+            color: isDark ? "#F5A623" : "#0D0B06" }}>
           {isDark ? "☀" : "🌙"}
         </button>
       </>
     );
   }
 
-  /* Authenticated shell */
   return (
-    <div style={{ display:"flex", minHeight:"100vh" }}>
+    <div className="app-shell">
       <Sidebar
-        user={user}
-        activeTab={tab}
-        onNavigate={setTab}
-        onLogout={handleLogout}
+        user={user} activeTab={tab} onNavigate={nav}
+        isOpen={sideOpen} onClose={() => setSideOpen(false)}
       />
-      <div style={{ marginLeft:"var(--sidebar-w)", flex:1, display:"flex",
-        flexDirection:"column", minHeight:"100vh", background:"var(--bg-base)" }}>
+      <div className="main-wrap" style={{ background:"var(--bg-base)" }}>
         <Header
-          activeTab={tab}
-          user={user}
-          isDark={isDark}
+          activeTab={tab} isDark={isDark}
           onToggleTheme={() => setIsDark(d => !d)}
+          onLogout={logout}
+          onMenuOpen={() => setSideOpen(o => !o)}
         />
-        <main key={`${user.role}-${tab}`} style={{ flex:1, padding:"28px 32px", maxWidth:"1160px", width:"100%" }}>
-          <PageContent />
+        <main className="page-main">
+          {user.role === "student"     && <StudentView activeTab={tab} onNavigate={nav}/>}
+          {user.role === "chairperson" && <ChairView   activeTab={tab} onNavigate={nav}/>}
+          {user.role === "hr"          && <HRView      activeTab={tab} onNavigate={nav}/>}
         </main>
-        <Footer />
+        <Footer/>
       </div>
     </div>
   );

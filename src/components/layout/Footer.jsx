@@ -1,40 +1,13 @@
-/**
- * Footer.jsx
- * Minimal page footer with institutional info.
- */
-
 export default function Footer() {
   return (
-    <footer
-      style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "16px 32px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "8px",
-        marginTop: "auto",
-      }}
-    >
-      <span
-        style={{
-          fontSize: "11px",
-          color: "#5C6480",
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-        }}
-      >
-        © 2026 University of Santo Tomas–Legazpi · College of Engineering, Architecture, and Fine Arts
-      </span>
-      <span
-        style={{
-          fontSize: "11px",
-          color: "#5C6480",
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-        }}
-      >
-        Data stored locally · ISO 25010 Compliant · v1.0.0
-      </span>
+    <footer style={{ borderTop:"1px solid var(--border)", padding:"14px 28px",
+      display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"8px" }}>
+      <p style={{ fontSize:"11px", color:"var(--text-muted)" }}>
+        UST–Legazpi Faculty Evaluation System © 2026
+      </p>
+      <p style={{ fontSize:"11px", color:"var(--text-muted)" }}>
+        Powered by QLoRA Fine-Tuned Llama 3
+      </p>
     </footer>
   );
 }
