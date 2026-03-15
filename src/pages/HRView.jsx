@@ -8,8 +8,8 @@ import { facultyList, departmentStats, aiFeedbackMap, auditLogs, SEMESTER } from
 
 function Card({ children, style={} }) {
   return (
-    <div style={{ background:"var(--bg-surface)", border:"1px solid var(--border)",
-      borderRadius:"var(--radius-md)", padding:"20px", boxShadow:"var(--shadow-sm)", ...style }}>
+    <div style={{ background:"#FFFFFF", border:"1px solid var(--border)",
+      borderRadius:"var(--radius-md)", padding:"20px", boxShadow:"var(--shadow-card)", ...style }}>
       {children}
     </div>
   );
@@ -17,7 +17,7 @@ function Card({ children, style={} }) {
 function ScoreBar({ score, max=5 }) {
   return (
     <div style={{ flex:1, height:"5px", background:"var(--border)", borderRadius:"99px", overflow:"hidden" }}>
-      <div style={{ width:`${(score/max)*100}%`, height:"100%", background:"var(--amber)", borderRadius:"99px" }}/>
+      <div style={{ width:`${(score/max)*100}%`, height:"100%", background:"var(--gold)", borderRadius:"99px" }}/>
     </div>
   );
 }
@@ -40,7 +40,7 @@ function Overview() {
             <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase",
               color:"var(--text-muted)", marginBottom:"10px" }}>{k.label}</p>
             <p style={{ fontFamily:"var(--font-display)", fontSize:"30px", fontWeight:600,
-              color:"var(--amber)", lineHeight:1, marginBottom:"4px" }}>{k.value}</p>
+              color:"var(--gold-darker)", lineHeight:1, marginBottom:"4px" }}>{k.value}</p>
             <p style={{ fontSize:"12px", color:"var(--text-muted)" }}>{k.sub}</p>
           </Card>
         ))}
@@ -52,7 +52,7 @@ function Overview() {
           <Card key={i} style={{ padding:"18px 22px" }}>
             <div style={{ display:"flex", alignItems:"center", gap:"16px", flexWrap:"wrap" }}>
               <div style={{ minWidth:"60px" }}>
-                <p style={{ fontFamily:"var(--font-display)", fontSize:"13px", fontWeight:700, color:"var(--amber)" }}>{d.dept}</p>
+                <p style={{ fontFamily:"var(--font-display)", fontSize:"13px", fontWeight:700, color:"var(--gold)" }}>{d.dept}</p>
                 <p style={{ fontSize:"11px", color:"var(--text-muted)" }}>{d.faculty} faculty</p>
               </div>
               <div style={{ flex:1, minWidth:"160px" }}>
@@ -83,7 +83,7 @@ function FacultyReports() {
   const [deptFilter, setDeptFilter] = useState("ALL");
   const depts    = ["ALL","CEAFA","CASE","CBMA","CHS"];
   const filtered = deptFilter==="ALL" ? facultyList : facultyList.filter(f=>f.dept===deptFilter);
-  const sMap = { excellent:{c:"var(--success)",l:"Excellent"}, good:{c:"var(--amber)",l:"Good"},
+  const sMap = { excellent:{c:"var(--success)",l:"Excellent"}, good:{c:"var(--gold)",l:"Good"},
     average:{c:"var(--text-second)",l:"Average"}, needsSupport:{c:"var(--danger)",l:"Needs Support"} };
   return (
     <div className="anim-fade-in">
@@ -92,13 +92,13 @@ function FacultyReports() {
         <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
           {depts.map(d=>(
             <button key={d} onClick={()=>setDeptFilter(d)} style={{ padding:"5px 14px", borderRadius:"99px", fontSize:"12px", fontWeight:600,
-              background:deptFilter===d?"var(--amber-dim)":"transparent",
-              color:deptFilter===d?"var(--amber)":"var(--text-muted)",
-              border:`1px solid ${deptFilter===d?"var(--amber-border)":"var(--border)"}` }}>{d}</button>
+              background:deptFilter===d?"var(--gold-dim)":"transparent",
+              color:deptFilter===d?"var(--gold)":"var(--text-muted)",
+              border:`1px solid ${deptFilter===d?"var(--gold-border)":"var(--border)"}` }}>{d}</button>
           ))}
         </div>
-        <button style={{ padding:"7px 16px", borderRadius:"var(--radius-sm)", background:"var(--amber-dim)",
-          border:"1px solid var(--amber-border)", color:"var(--amber)", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>
+        <button style={{ padding:"7px 16px", borderRadius:"var(--radius-sm)", background:"var(--gold-dim)",
+          border:"1px solid var(--amber-border)", color:"var(--gold)", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>
           Export CSV ↓
         </button>
       </div>
@@ -106,7 +106,7 @@ function FacultyReports() {
         <div className="tbl-wrap">
           <table style={{ width:"100%", borderCollapse:"collapse" }}>
             <thead>
-              <tr style={{ background:"var(--bg-elevated)" }}>
+              <tr style={{ background:"var(--bg-base)" }}>
                 {["Faculty","Subject / Code","Student (70%)","Chair (30%)","Composite","Status","Chair Eval"].map(h=>(
                   <th key={h} style={{ padding:"10px 14px", textAlign:"left", fontSize:"10px", fontWeight:700,
                     letterSpacing:"0.06em", textTransform:"uppercase", color:"var(--text-muted)",
@@ -118,7 +118,7 @@ function FacultyReports() {
               {filtered.map((f,i)=>(
                 <tr key={f.id}
                   style={{ borderBottom:i<filtered.length-1?"1px solid var(--border)":"none", transition:"background 0.12s" }}
-                  onMouseEnter={e=>(e.currentTarget.style.background="var(--bg-elevated)")}
+                  onMouseEnter={e=>(e.currentTarget.style.background="var(--bg-base)")}
                   onMouseLeave={e=>(e.currentTarget.style.background="transparent")}>
                   <td style={{ padding:"12px 14px" }}>
                     <p style={{ fontSize:"13px", fontWeight:600 }}>{f.name}</p>
@@ -132,7 +132,7 @@ function FacultyReports() {
                   <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"16px", fontWeight:600 }}>
                     {f.chairEvaluated ? f.chairScore.toFixed(2) : <span style={{ fontSize:"12px", color:"var(--text-muted)" }}>—</span>}
                   </td>
-                  <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--amber)" }}>{f.compositeScore.toFixed(2)}</td>
+                  <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--gold)" }}>{f.compositeScore.toFixed(2)}</td>
                   <td style={{ padding:"12px 14px" }}>
                     <span style={{ fontSize:"12px", fontWeight:700, color:(sMap[f.status]||sMap.average).c }}>
                       {(sMap[f.status]||sMap.average).l}
@@ -159,7 +159,7 @@ function AIFeedbackReview() {
   const withFeedback = facultyList.filter(f=>aiFeedbackMap[f.id]);
   return (
     <div className="anim-fade-in">
-      <div style={{ padding:"14px 18px", background:"var(--bg-elevated)", border:"1px solid var(--border)",
+      <div style={{ padding:"14px 18px", background:"var(--bg-base)", border:"1px solid var(--border)",
         borderRadius:"var(--radius-md)", marginBottom:"20px" }}>
         <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.6 }}>
           Each AI report synthesizes <strong>student evaluation responses</strong> and the{" "}
@@ -180,10 +180,10 @@ function AIFeedbackReview() {
                   <p style={{ fontWeight:600, fontSize:"14px", color:"var(--text-primary)", marginBottom:"2px" }}>{f.name}</p>
                   <p style={{ fontSize:"12px", color:"var(--text-second)" }}>
                     {f.dept} · {f.code} · {f.responses} responses · Composite:
-                    {" "}<strong style={{color:"var(--amber)"}}>{f.compositeScore.toFixed(2)}</strong>
+                    {" "}<strong style={{color:"var(--gold)"}}>{f.compositeScore.toFixed(2)}</strong>
                   </p>
                 </div>
-                <span style={{ fontSize:"11px", fontWeight:700, color:"var(--amber)", background:"var(--amber-dim)",
+                <span style={{ fontSize:"11px", fontWeight:700, color:"var(--gold)", background:"var(--gold-dim)",
                   border:"1px solid var(--amber-border)", borderRadius:"99px", padding:"3px 10px" }}>Report Ready</span>
                 <span style={{ fontSize:"18px", color:"var(--text-muted)", transition:"transform 0.2s",
                   transform:open?"rotate(180deg)":"rotate(0deg)" }}>⌄</span>
@@ -195,7 +195,7 @@ function AIFeedbackReview() {
                   {/* ── Chair evaluation scores block ────── */}
                   {f.chairEvaluated && (
                     <div style={{ marginTop:"18px", marginBottom:"16px", padding:"16px",
-                      background:"var(--bg-elevated)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)" }}>
+                      background:"var(--bg-base)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)" }}>
                       <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase",
                         color:"var(--text-muted)", marginBottom:"12px" }}>📋 Chair Evaluation Summary</p>
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:"10px", marginBottom:"12px" }}>
@@ -205,23 +205,23 @@ function AIFeedbackReview() {
                           { label:"Community Ext.",     value:f.chairScoreBreakdown?.ce || "4.5" },
                           { label:"Performance",        value:f.chairScoreBreakdown?.pf || "4.7" },
                         ].map((item,i)=>(
-                          <div key={i} style={{ padding:"10px 12px", background:"var(--bg-surface)",
+                          <div key={i} style={{ padding:"10px 12px", background:"#FFFFFF",
                             border:"1px solid var(--border)", borderRadius:"8px", textAlign:"center" }}>
                             <p style={{ fontSize:"18px", fontWeight:700, fontFamily:"var(--font-display)",
-                              color:"var(--amber)", lineHeight:1, marginBottom:"4px" }}>{item.value}</p>
+                              color:"var(--gold-darker)", lineHeight:1, marginBottom:"4px" }}>{item.value}</p>
                             <p style={{ fontSize:"10px", color:"var(--text-muted)", fontWeight:600 }}>{item.label}</p>
                           </div>
                         ))}
                       </div>
-                      <div style={{ padding:"10px 12px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)",
+                      <div style={{ padding:"10px 12px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
                         borderRadius:"8px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                         <p style={{ fontSize:"12px", color:"var(--text-second)", fontWeight:600 }}>Chair Score</p>
-                        <p style={{ fontFamily:"var(--font-display)", fontSize:"20px", fontWeight:700, color:"var(--amber)" }}>
+                        <p style={{ fontFamily:"var(--font-display)", fontSize:"20px", fontWeight:700, color:"var(--gold)" }}>
                           {f.chairScore.toFixed(2)}
                         </p>
                       </div>
                       {fb.chairRemarks && (
-                        <div style={{ marginTop:"10px", padding:"10px 12px", background:"var(--bg-surface)",
+                        <div style={{ marginTop:"10px", padding:"10px 12px", background:"#FFFFFF",
                           border:"1px solid var(--border)", borderRadius:"8px" }}>
                           <p style={{ fontSize:"10px", fontWeight:700, color:"var(--text-muted)", marginBottom:"5px",
                             letterSpacing:"0.05em", textTransform:"uppercase" }}>Chairperson Remarks</p>
@@ -239,17 +239,17 @@ function AIFeedbackReview() {
                       <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--success)", marginBottom:"8px" }}>✦ Strengths</p>
                       {fb.strengths.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.strengths.length-1?"8px":0 }}>{s}</p>)}
                     </div>
-                    <div style={{ padding:"14px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--amber)", marginBottom:"8px" }}>◈ Points for Improvement</p>
+                    <div style={{ padding:"14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
+                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"8px" }}>◈ Points for Improvement</p>
                       {fb.improvements.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.improvements.length-1?"8px":0 }}>{s}</p>)}
                     </div>
                   </div>
-                  <div style={{ padding:"12px 14px", background:"var(--bg-elevated)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)", marginBottom:"10px" }}>
+                  <div style={{ padding:"12px 14px", background:"var(--bg-base)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)", marginBottom:"10px" }}>
                     <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--text-muted)", marginBottom:"8px" }}>📌 Student Evidence</p>
                     {fb.citations.map((c,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-muted)", fontStyle:"italic", lineHeight:1.6, paddingLeft:"12px", borderLeft:"2px solid var(--amber-border)", marginBottom:i<fb.citations.length-1?"8px":0 }}>{c}</p>)}
                   </div>
-                  <div style={{ padding:"12px 14px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                    <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--amber)", marginBottom:"6px" }}>🎯 Recommendation</p>
+                  <div style={{ padding:"12px 14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
+                    <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"6px" }}>🎯 Recommendation</p>
                     <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7 }}>{fb.recommendation}</p>
                   </div>
                 </div>
@@ -288,7 +288,7 @@ function StudentHashRow({ h, index }) {
         </span>
         <span style={{ fontFamily:"monospace", fontSize:"11px", color:"var(--text-second)",
           flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{h}</span>
-        <span style={{ fontSize:"10px", fontWeight:700, color:"var(--amber)", background:"var(--amber-dim)",
+        <span style={{ fontSize:"10px", fontWeight:700, color:"var(--gold)", background:"var(--gold-dim)",
           border:"1px solid var(--amber-border)", borderRadius:"4px", padding:"1px 8px",
           flexShrink:0, whiteSpace:"nowrap" }}>avg {avg} ★</span>
         <span style={{ fontSize:"13px", color:"var(--text-muted)", transition:"transform 0.15s",
@@ -296,29 +296,29 @@ function StudentHashRow({ h, index }) {
       </button>
       {open && (
         <div className="anim-fade-in" style={{ borderTop:"1px solid var(--border)",
-          padding:"14px 12px", background:"var(--bg-surface)" }}>
+          padding:"14px 12px", background:"#FFFFFF" }}>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(155px,1fr))", gap:"8px", marginBottom:"12px" }}>
             {Object.entries(sample.ratings).map(([key,val])=>(
-              <div key={key} style={{ padding:"8px 10px", background:"var(--bg-elevated)",
+              <div key={key} style={{ padding:"8px 10px", background:"var(--bg-base)",
                 border:"1px solid var(--border)", borderRadius:"6px" }}>
                 <p style={{ fontSize:"10px", color:"var(--text-muted)", marginBottom:"4px", fontWeight:600 }}>{CRIT_LABELS[key]}</p>
                 <div style={{ display:"flex", alignItems:"center", gap:"3px" }}>
                   {[1,2,3,4,5].map(n=>(
-                    <span key={n} style={{ color:n<=val?"var(--amber)":"var(--border)", fontSize:"14px" }}>★</span>
+                    <span key={n} style={{ color:n<=val?"var(--gold)":"var(--border)", fontSize:"14px" }}>★</span>
                   ))}
                   <span style={{ fontSize:"12px", color:"var(--text-second)", marginLeft:"4px", fontWeight:600 }}>{val}/5</span>
                 </div>
               </div>
             ))}
           </div>
-          <div style={{ padding:"10px 12px", background:"var(--bg-elevated)", border:"1px solid var(--border)", borderRadius:"6px" }}>
+          <div style={{ padding:"10px 12px", background:"var(--bg-base)", border:"1px solid var(--border)", borderRadius:"6px" }}>
             <p style={{ fontSize:"10px", fontWeight:700, color:"var(--text-muted)", marginBottom:"5px",
               letterSpacing:"0.05em", textTransform:"uppercase" }}>Open-Ended Comment</p>
             <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, fontStyle:"italic" }}>"{sample.comment}"</p>
           </div>
-          {/* <p style={{ fontSize:"10px", color:"var(--text-muted)", marginTop:"8px", lineHeight:1.6 }}>
+          <p style={{ fontSize:"10px", color:"var(--text-muted)", marginTop:"8px", lineHeight:1.6 }}>
             This is a representative sample of the evaluation data mapped to this hash. Actual text is not retained after processing.
-          </p> */}
+          </p>
         </div>
       )}
     </div>
@@ -333,16 +333,16 @@ function ChairHashRow({ hash, log }) {
       <button onClick={()=>setOpen(o=>!o)} style={{ width:"100%", display:"flex", alignItems:"center",
         gap:"10px", padding:"10px 12px", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
         <span style={{ fontSize:"10px", color:"var(--text-muted)", minWidth:"56px", flexShrink:0 }}>CHAIR</span>
-        <span style={{ fontFamily:"monospace", fontSize:"11px", color:"var(--amber)",
+        <span style={{ fontFamily:"monospace", fontSize:"11px", color:"var(--gold)",
           flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{hash}</span>
-        <span style={{ fontSize:"10px", fontWeight:700, color:"var(--amber)", background:"var(--amber-dim)",
+        <span style={{ fontSize:"10px", fontWeight:700, color:"var(--gold)", background:"var(--gold-dim)",
           border:"1px solid var(--amber-border)", borderRadius:"4px", padding:"1px 8px", flexShrink:0 }}>View</span>
         <span style={{ fontSize:"13px", color:"var(--text-muted)", transition:"transform 0.15s",
           transform:open?"rotate(180deg)":"rotate(0deg)", flexShrink:0 }}>⌄</span>
       </button>
       {open && faculty && (
         <div className="anim-fade-in" style={{ borderTop:"1px solid var(--amber-border)",
-          padding:"14px 12px", background:"var(--bg-surface)" }}>
+          padding:"14px 12px", background:"#FFFFFF" }}>
           {faculty.chairScoreBreakdown && (
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:"8px", marginBottom:"12px" }}>
               {[
@@ -351,13 +351,13 @@ function ChairHashRow({ hash, log }) {
                 { label:"Community Extension",   key:"ce", weight:"20%" },
                 { label:"Performance",           key:"pf", weight:"20%" },
               ].map(item=>(
-                <div key={item.key} style={{ padding:"10px 12px", background:"var(--bg-elevated)",
+                <div key={item.key} style={{ padding:"10px 12px", background:"var(--bg-base)",
                   border:"1px solid var(--border)", borderRadius:"6px", textAlign:"center" }}>
                   <p style={{ fontSize:"10px", color:"var(--text-muted)", marginBottom:"3px", fontWeight:600 }}>
                     {item.label}
-                    <span style={{ display:"block", color:"var(--amber)", fontWeight:700 }}>{item.weight}</span>
+                    <span style={{ display:"block", color:"var(--gold)", fontWeight:700 }}>{item.weight}</span>
                   </p>
-                  <p style={{ fontFamily:"var(--font-display)", fontSize:"22px", fontWeight:700, color:"var(--amber)", lineHeight:1.2 }}>
+                  <p style={{ fontFamily:"var(--font-display)", fontSize:"22px", fontWeight:700, color:"var(--gold)", lineHeight:1.2 }}>
                     {faculty.chairScoreBreakdown[item.key]}
                   </p>
                 </div>
@@ -365,15 +365,15 @@ function ChairHashRow({ hash, log }) {
             </div>
           )}
           {log.chairRemarks && (
-            <div style={{ padding:"10px 12px", background:"var(--bg-elevated)", border:"1px solid var(--border)", borderRadius:"6px", marginBottom:"8px" }}>
+            <div style={{ padding:"10px 12px", background:"var(--bg-base)", border:"1px solid var(--border)", borderRadius:"6px", marginBottom:"8px" }}>
               <p style={{ fontSize:"10px", fontWeight:700, color:"var(--text-muted)", marginBottom:"5px",
                 letterSpacing:"0.05em", textTransform:"uppercase" }}>Chairperson Remarks</p>
               <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, fontStyle:"italic" }}>"{log.chairRemarks}"</p>
             </div>
           )}
-          {/* <p style={{ fontSize:"10px", color:"var(--text-muted)", marginTop:"4px", lineHeight:1.6 }}>
+          <p style={{ fontSize:"10px", color:"var(--text-muted)", marginTop:"4px", lineHeight:1.6 }}>
             This is a representative sample of the chair evaluation data mapped to this hash. Actual text is not retained after processing.
-          </p> */}
+          </p>
         </div>
       )}
     </div>
@@ -396,7 +396,7 @@ function AuditLog() {
         </p>
         <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7 }}>
           Click any faculty row to expand its inputs. Inside, click any student hash or the
-          chairperson hash to view the evaluation data it represents.
+          chairperson hash to view a sample of the evaluation data it represents.
         </p>
       </Card>
 
@@ -420,7 +420,7 @@ function AuditLog() {
                 </div>
                 <div style={{ minWidth:"130px" }}>
                   <p style={{ fontSize:"10px", color:"var(--text-muted)", marginBottom:"1px" }}>Input Hash</p>
-                  <p style={{ fontSize:"11px", color:"var(--amber)", fontFamily:"monospace" }}>{log.hash}</p>
+                  <p style={{ fontSize:"11px", color:"var(--gold)", fontFamily:"monospace" }}>{log.hash}</p>
                 </div>
                 <p style={{ fontSize:"11px", color:"var(--text-muted)", minWidth:"120px", textAlign:"right" }}>
                   {log.timestamp}
@@ -431,7 +431,7 @@ function AuditLog() {
 
               {open && (
                 <div className="anim-fade-in" style={{ borderTop:"1px solid var(--border)",
-                  padding:"18px 20px", background:"var(--bg-elevated)" }}>
+                  padding:"18px 20px", background:"var(--bg-base)" }}>
                   <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase",
                     color:"var(--text-muted)", marginBottom:"14px" }}>Input Records: click any row to view sample evaluation data</p>
                   <p style={{ fontSize:"12px", fontWeight:700, color:"var(--text-second)", marginBottom:"8px" }}>
@@ -448,7 +448,7 @@ function AuditLog() {
                   <ChairHashRow hash={log.chairHash} log={log}/>
                   <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"14px", lineHeight:1.6 }}>
                     These hashes confirm that the AI report was generated from these exact inputs.
-                    {/* The actual response text is not retained after processing; only its cryptographic fingerprint is kept. */}
+                    The actual response text is not retained after processing; only its cryptographic fingerprint is kept.
                   </p>
                 </div>
               )}

@@ -1,47 +1,70 @@
 import { useState } from "react";
 import { USERS } from "../data/mockData.js";
 
-function USTLogo({ isDark }) {
-  const gold = isDark ? "#F5A623" : "#B87200";
-  // Two proper semicircle arcs — prevents rotated/tumbled letter rendering
-  const ringPath = "M 120,17 A 103,103 0 0,1 120,223 A 103,103 0 0,1 120,17";
+/**
+ * Login — clean cream card with circular badge logo.
+ * Matches the design shown in reference image 3.
+ * Colors: warm cream bg, #A07800 gold accents, #1A1200 dark text.
+ * No navy, no blue, no colored header bands.
+ *
+ * Ring text geometry (viewBox 220×220, cx=cy=110, ring-r=95):
+ *   Two-arc construction for reliable full-circle text rendering.
+ *   Circumference ≈ 597px. "PERFORMANCE · EVALUATION · SYSTEM ·" = 36 chars.
+ *   fontSize 9.5, letterSpacing = (597/36) - ~5.7 ≈ 10.9
+ */
+function CircularBadge() {
+  const gold = "#C8940A";
+  const ringPath = "M 110,15 A 95,95 0 0,1 110,205 A 95,95 0 0,1 110,15";
+
   return (
-    <svg width="240" height="240" viewBox="0 0 240 240" fill="none">
-      <circle cx="120" cy="120" r="116" stroke={gold} strokeWidth="1.8"/>
-      <circle cx="120" cy="120" r="108" stroke={gold} strokeWidth="0.5" opacity="0.35"/>
-      <defs><path id="ring" d={ringPath}/></defs>
-      <text fontSize="10" fontFamily="'Plus Jakarta Sans',sans-serif" fontWeight="700" fill={gold} letterSpacing="11.9">
-        <textPath href="#ring" startOffset="1%">PERFORMANCE · EVALUATION · SYSTEM ·</textPath>
+    <svg width="220" height="220" viewBox="0 0 220 220" fill="none">
+      {/* Outer border rings */}
+      <circle cx="110" cy="110" r="107" stroke={gold} strokeWidth="1.6"/>
+      <circle cx="110" cy="110" r="98"  stroke={gold} strokeWidth="0.5" opacity="0.40"/>
+
+      {/* Ring text */}
+      <defs><path id="badge-ring" d={ringPath}/></defs>
+      <text fontSize="9.5" fontFamily="'Plus Jakarta Sans',sans-serif"
+        fontWeight="700" fill={gold} letterSpacing="10.9">
+        <textPath href="#badge-ring" startOffset="1%">
+          PERFORMANCE · EVALUATION · SYSTEM ·
+        </textPath>
       </text>
-      {/* Academic shield — centered at (120, 120) */}
-      {/* Shield spans y=65 to y=178, center = y=121.5 ≈ 120 */}
-      <path d="M 88,65 L 152,65 Q 160,65 160,75 L 160,128
-               Q 160,158 120,178 Q 80,158 80,128 L 80,75
-               Q 80,65 88,65 Z"
-        fill="none" stroke={gold} strokeWidth="2.2"/>
-      <path d="M 90,70 L 150,70 Q 156,70 156,79 L 156,127
-               Q 156,153 120,171 Q 84,153 84,127 L 84,79
-               Q 84,70 90,70 Z"
-        fill="none" stroke={gold} strokeWidth="0.5" opacity="0.28"/>
-      {/* Dominican cross — near top of shield */}
-      <line x1="120" y1="78" x2="120" y2="91" stroke={gold} strokeWidth="1.3" opacity="0.60"/>
-      <line x1="113" y1="85" x2="127" y2="85" stroke={gold} strokeWidth="1.3" opacity="0.60"/>
+
+      {/* Academic shield — centered at (110,110), spans y=55 to y=168 */}
+      <path d="M 82,55 L 138,55 Q 146,55 146,65 L 146,115
+               Q 146,144 110,162 Q 74,144 74,115 L 74,65
+               Q 74,55 82,55 Z"
+        fill="#FDFAF3" stroke={gold} strokeWidth="2"/>
+      {/* Inner shield outline */}
+      <path d="M 84,60 L 136,60 Q 142,60 142,69 L 142,114
+               Q 142,140 110,156 Q 78,140 78,114 L 78,69
+               Q 78,60 84,60 Z"
+        fill="none" stroke={gold} strokeWidth="0.5" opacity="0.30"/>
+
+      {/* Dominican cross at shield top */}
+      <line x1="110" y1="68" x2="110" y2="80" stroke={gold} strokeWidth="1.2" opacity="0.65"/>
+      <line x1="104" y1="74" x2="116" y2="74" stroke={gold} strokeWidth="1.2" opacity="0.65"/>
+
       {/* Horizontal divider */}
-      <line x1="90" y1="112" x2="150" y2="112" stroke={gold} strokeWidth="0.8" opacity="0.45"/>
-      {/* UST-L */}
-      <text x="120" y="108" textAnchor="middle" fontSize="21"
+      <line x1="84" y1="102" x2="136" y2="102" stroke={gold} strokeWidth="0.8" opacity="0.40"/>
+
+      {/* UST-L wordmark */}
+      <text x="110" y="98" textAnchor="middle" fontSize="19"
         fontFamily="'Fraunces',serif" fontWeight="700" fill={gold}>UST-L</text>
-      {/* Fine rule below UST-L */}
-      <line x1="96" y1="117" x2="144" y2="117" stroke={gold} strokeWidth="0.7" opacity="0.38"/>
+
+      {/* Fine rule */}
+      <line x1="92" y1="107" x2="128" y2="107" stroke={gold} strokeWidth="0.6" opacity="0.35"/>
+
       {/* LEGAZPI */}
-      <text x="120" y="132" textAnchor="middle" fontSize="7.5"
+      <text x="110" y="121" textAnchor="middle" fontSize="7"
         fontFamily="'Plus Jakarta Sans',sans-serif" fontWeight="700"
-        letterSpacing="3.5" fill={gold} opacity="0.68">LEGAZPI</text>
+        letterSpacing="3" fill={gold} opacity="0.70">LEGAZPI</text>
     </svg>
   );
 }
 
-export default function Login({ onLogin, isDark }) {
+export default function Login({ onLogin }) {
   const [userId,  setUserId]  = useState("");
   const [password,setPassword]= useState("");
   const [error,   setError]   = useState("");
@@ -57,62 +80,107 @@ export default function Login({ onLogin, isDark }) {
     setTimeout(() => {
       const u = USERS[userId.trim().toLowerCase()];
       if (u && password === u.password) onLogin(u);
-      else { setError("Invalid credentials. Please try again."); setLoading(false); }
+      else { setError("Invalid ID or password. Please try again."); setLoading(false); }
     }, 550);
   };
 
-  const gold   = isDark ? "#F5A623" : "#B87200";
-  const border = isDark ? "rgba(245,166,35,0.26)" : "rgba(160,100,0,0.28)";
-  const inp = { width:"100%", padding:"12px 16px", borderRadius:"10px",
-    background: isDark?"rgba(245,166,35,0.07)":"rgba(255,255,255,0.90)",
-    border:`1px solid ${border}`, color:isDark?"#F5EDD6":"#1C1208", fontSize:"14px",
-    transition:"border-color 0.2s, box-shadow 0.2s" };
-  const fo = (e) => { e.target.style.borderColor=gold; e.target.style.boxShadow=`0 0 0 3px ${isDark?"rgba(245,166,35,0.11)":"rgba(184,114,0,0.10)"}`; };
-  const bl = (e) => { e.target.style.borderColor=border; e.target.style.boxShadow="none"; };
+  // Warm gold tones — no navy/blue
+  const gold       = "#C8940A";
+  const goldDeep   = "#A07800";
+  const borderClr  = "rgba(200,148,10,0.22)";
+
+  const inp = {
+    width:"100%", padding:"13px 16px", borderRadius:"10px",
+    background:"#FFFFFF", border:`1.5px solid ${borderClr}`,
+    color:"#1A1200", fontSize:"14px", transition:"all 0.18s",
+  };
+  const fo = (e) => {
+    e.target.style.borderColor = gold;
+    e.target.style.boxShadow = "0 0 0 3px rgba(160,120,0,0.09)";
+  };
+  const bl = (e) => {
+    e.target.style.borderColor = borderClr;
+    e.target.style.boxShadow = "none";
+  };
 
   return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center",
-      background: isDark ? "radial-gradient(ellipse at 50% 40%, #2C1A00, #160C00 50%, #0D0B06)"
-                         : "radial-gradient(ellipse at 50% 40%, #F0D060, #CEAA14 42%, #A88000)",
-      padding:"24px" }}>
-      <div className="anim-fade-up" style={{ width:"100%", maxWidth:"420px", textAlign:"center",
-        background: isDark?"rgba(18,13,2,0.94)":"rgba(255,253,242,0.97)",
-        backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderRadius:"22px",
-        border: isDark?"1px solid rgba(245,166,35,0.18)":"1px solid rgba(160,100,0,0.18)",
-        padding:"30px 32px 28px",
-        boxShadow: isDark?"0 28px 64px rgba(0,0,0,0.72)":"0 20px 52px rgba(100,60,0,0.28)" }}>
+    <div style={{
+      minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center",
+      background:"#FDF8E8",   /* warm cream page background */
+      padding:"24px",
+    }}>
+      <div className="anim-fade-up" style={{
+        width:"100%", maxWidth:"400px", textAlign:"center",
+        background:"#FDFAF3",
+        borderRadius:"20px",
+        border:"1px solid rgba(160,120,0,0.18)",
+        padding:"32px 32px 24px",
+        boxShadow:"0 8px 40px rgba(100,80,0,0.14), 0 2px 8px rgba(100,80,0,0.08)",
+      }}>
+
+        {/* Circular badge logo */}
         <div style={{ display:"flex", justifyContent:"center", marginBottom:"10px" }}>
-          <USTLogo isDark={isDark}/>
+          <CircularBadge/>
         </div>
-        <p style={{ fontSize:"10.5px", letterSpacing:"0.18em", color:gold, fontWeight:700, textTransform:"uppercase", marginBottom:"3px" }}>UST – Legazpi</p>
-        <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:700, color:isDark?"#F5EDD6":"#1C1208", marginBottom:"22px", lineHeight:1.3 }}>Faculty Evaluation Portal</h1>
-        <div style={{ display:"flex", gap:"6px", justifyContent:"center", marginBottom:"18px", flexWrap:"wrap" }}>
+
+        {/* Header text */}
+        <p style={{ fontSize:"11px", letterSpacing:"0.16em", color:gold,
+          fontWeight:700, textTransform:"uppercase", marginBottom:"4px" }}>
+          UST – Legazpi
+        </p>
+        <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"22px", fontWeight:700,
+          color:"#1A1200", marginBottom:"22px", lineHeight:1.3 }}>
+          Faculty Evaluation Portal
+        </h1>
+
+        {/* Quick-fill role buttons */}
+        <div style={{ display:"flex", gap:"6px", justifyContent:"center",
+          marginBottom:"20px", flexWrap:"wrap" }}>
           {[{id:"student",label:"Student"},{id:"chairperson",label:"Chairperson"},{id:"hr",label:"HR"}].map(r=>(
-            <button key={r.id} onClick={()=>fill(r.id)} style={{ padding:"4px 14px", borderRadius:"99px",
-              border:`1px solid ${userId===r.id?gold:border}`,
-              background:userId===r.id?(isDark?"rgba(245,166,35,0.14)":"rgba(184,114,0,0.10)"):"transparent",
-              color:userId===r.id?gold:(isDark?"rgba(245,166,35,0.42)":"rgba(140,88,0,0.52)"),
-              fontSize:"11px", fontWeight:700, cursor:"pointer" }}>{r.label}</button>
+            <button key={r.id} onClick={()=>fill(r.id)} style={{
+              padding:"5px 16px", borderRadius:"99px",
+              border:`1.5px solid ${userId===r.id ? gold : borderClr}`,
+              background: userId===r.id ? gold : "transparent",
+              color: userId===r.id ? "#FDFAF3" : "#8A7A40",
+              fontSize:"12px", fontWeight:700, cursor:"pointer", transition:"all 0.15s",
+            }}>{r.label}</button>
           ))}
         </div>
+
+        {/* Form */}
         <form onSubmit={handleSubmit} style={{ textAlign:"left" }}>
           <input type="text" placeholder="Employee / Student ID" value={userId}
-            onChange={e=>{setUserId(e.target.value);setError("");}} style={{...inp,marginBottom:"10px"}} onFocus={fo} onBlur={bl}/>
+            onChange={e=>{setUserId(e.target.value);setError("");}}
+            style={{...inp, marginBottom:"10px"}} onFocus={fo} onBlur={bl}/>
           <input type="password" placeholder="Password" value={password}
-            onChange={e=>{setPassword(e.target.value);setError("");}} style={inp} onFocus={fo} onBlur={bl}/>
-          {error&&<p style={{color:"#E05252",fontSize:"12px",marginTop:"8px",textAlign:"center"}}>{error}</p>}
+            onChange={e=>{setPassword(e.target.value);setError("");}}
+            style={inp} onFocus={fo} onBlur={bl}/>
+
+          {error && (
+            <div style={{ padding:"9px 14px", background:"rgba(184,48,48,0.07)",
+              border:"1px solid rgba(184,48,48,0.20)", borderRadius:"8px", marginTop:"10px" }}>
+              <p style={{ color:"#B83030", fontSize:"12px", fontWeight:600 }}>{error}</p>
+            </div>
+          )}
+
           <button type="submit" disabled={!canSubmit||loading} style={{
-            width:"100%", marginTop:"18px", padding:"13px", borderRadius:"10px",
-            background:(!canSubmit||loading)?(isDark?"rgba(245,166,35,0.20)":"rgba(184,114,0,0.16)"):gold,
-            color:(!canSubmit||loading)?(isDark?"rgba(245,166,35,0.35)":"rgba(120,78,0,0.38)"):"#0D0B06",
-            fontWeight:800, fontSize:"14px", letterSpacing:"0.10em", textTransform:"uppercase",
-            border:"none", cursor:(!canSubmit||loading)?"not-allowed":"pointer", transition:"all 0.2s",
-            boxShadow:canSubmit?`0 4px 18px ${isDark?"rgba(245,166,35,0.28)":"rgba(160,100,0,0.30)"}`: "none" }}
-            onMouseEnter={e=>{if(canSubmit&&!loading){e.currentTarget.style.background=isDark?"#C8850A":"#8C5800";e.currentTarget.style.transform="translateY(-1px)";}}}
+            width:"100%", marginTop:"16px", padding:"14px",
+            borderRadius:"10px",
+            background: (!canSubmit||loading) ? "rgba(160,120,0,0.25)" : gold,
+            color: (!canSubmit||loading) ? "rgba(160,120,0,0.45)" : "#FDFAF3",
+            fontWeight:800, fontSize:"14px", letterSpacing:"0.10em",
+            textTransform:"uppercase", border:"none",
+            cursor:(!canSubmit||loading)?"not-allowed":"pointer",
+            transition:"all 0.18s",
+            boxShadow: canSubmit ? "0 4px 16px rgba(160,120,0,0.28)" : "none",
+          }}
+            onMouseEnter={e=>{if(canSubmit&&!loading){e.currentTarget.style.background=goldDeep;e.currentTarget.style.transform="translateY(-1px)";}}}
             onMouseLeave={e=>{if(canSubmit&&!loading){e.currentTarget.style.background=gold;e.currentTarget.style.transform="translateY(0)";}}}
-          >{loading?"Signing in…":"Login"}</button>
+          >{loading ? "Signing in…" : "Login"}</button>
         </form>
-        <p style={{ marginTop:"20px", fontSize:"11px", lineHeight:1.7, color:isDark?"rgba(200,160,80,0.48)":"rgba(100,65,0,0.50)" }}>
+
+        <p style={{ marginTop:"20px", fontSize:"11px", lineHeight:1.7,
+          color:"rgba(160,120,0,0.55)" }}>
           © 2026 University of Santo Tomas–Legazpi.<br/>All rights reserved.
         </p>
       </div>

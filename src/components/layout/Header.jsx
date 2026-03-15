@@ -7,68 +7,81 @@ const pageTitles = {
   audit:    { title:"Audit Log",              sub:"Traceable record of all AI-generated reports"      },
 };
 
-const IcoSun  = () => <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>;
-const IcoMoon = () => <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>;
-const IcoMenu = () => <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>;
-const IcoOut  = () => <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>;
+// Gray/neutral icons
+const IcoMenu = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+);
+const IcoOut = () => (
+  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+  </svg>
+);
+const IcoBell = () => (
+  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+  </svg>
+);
 
-export default function Header({ activeTab, isDark, onToggleTheme, onLogout, onMenuOpen }) {
+export default function Header({ activeTab, onLogout, onMenuOpen }) {
   const meta = pageTitles[activeTab] || { title:"Faculty Evaluation System", sub:"UST–Legazpi" };
 
   const iconBtn = {
     width:"36px", height:"36px", borderRadius:"var(--radius-sm)",
     background:"var(--bg-elevated)", border:"1px solid var(--border)",
-    color:"var(--text-second)", display:"flex", alignItems:"center",
-    justifyContent:"center", cursor:"pointer", flexShrink:0, transition:"all 0.14s",
+    color:"#7A8AAE",                    // neutral gray
+    display:"flex", alignItems:"center", justifyContent:"center",
+    cursor:"pointer", flexShrink:0, transition:"all 0.14s",
   };
 
   return (
     <header style={{
       height:"var(--header-h)", position:"sticky", top:0, zIndex:100,
-      background: isDark ? "rgba(13,11,6,0.93)" : "rgba(253,250,242,0.93)",
-      backdropFilter:"blur(14px)", WebkitBackdropFilter:"blur(14px)",
-      borderBottom:"1px solid var(--border)",
+      background:"rgba(255,255,255,0.96)",
+      backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)",
+      borderBottom:"2px solid var(--gold)",
       display:"flex", alignItems:"center", justifyContent:"space-between",
-      padding:"0 20px", gap:"12px",
+      padding:"0 24px", gap:"12px",
+      boxShadow:"0 2px 8px rgba(180,140,0,0.10)",
     }}>
 
-      {/* Left: hamburger + title */}
-      <div style={{ display:"flex", alignItems:"center", gap:"10px", minWidth:0 }}>
-        <button
-          className="hamburger"
-          onClick={onMenuOpen}
-          style={iconBtn}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--amber)";e.currentTarget.style.color="var(--amber)";}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text-second)";}}>
+      {/* Left: hamburger + breadcrumb */}
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", minWidth:0 }}>
+        <button className="hamburger" onClick={onMenuOpen} style={iconBtn}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--gold-border)";e.currentTarget.style.color="var(--gold-darker)";}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(26,50,112,0.12)";e.currentTarget.style.color="#7A8AAE";}}>
           <IcoMenu/>
         </button>
         <div style={{ minWidth:0 }}>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:"16px", fontWeight:600,
-            color:"var(--text-primary)", lineHeight:1.2,
-            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.title}</h1>
-          <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"1px",
+          <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+            <h1 style={{ fontFamily:"var(--font-display)", fontSize:"17px", fontWeight:600,
+              color:"var(--text-primary)", lineHeight:1.2,
+              whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.title}</h1>
+          </div>
+          <p style={{ fontSize:"11.5px", color:"var(--text-muted)", marginTop:"1px",
             whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.sub}</p>
         </div>
       </div>
 
-      {/* Right: theme + logout */}
+      {/* Right: notification + logout */}
       <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
-        <button onClick={onToggleTheme} title={isDark?"Switch to Light":"Switch to Dark"} style={iconBtn}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--amber)";e.currentTarget.style.color="var(--amber)";}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text-second)";}}>
-          {isDark ? <IcoSun/> : <IcoMoon/>}
+        <button style={iconBtn}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--gold-border)";e.currentTarget.style.color="var(--gold-darker)";}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(26,50,112,0.12)";e.currentTarget.style.color="#7A8AAE";}}>
+          <IcoBell/>
         </button>
 
         <button onClick={onLogout} style={{
-          display:"flex", alignItems:"center", gap:"6px",
+          display:"flex", alignItems:"center", gap:"7px",
           padding:"8px 14px", borderRadius:"var(--radius-sm)",
-          background: isDark ? "rgba(224,82,82,0.10)" : "rgba(192,57,43,0.07)",
-          border: isDark ? "1px solid rgba(224,82,82,0.28)" : "1px solid rgba(192,57,43,0.25)",
-          color: isDark ? "#E87878" : "#B03020",
+          background:"rgba(184,48,48,0.07)",
+          border:"1px solid rgba(184,48,48,0.20)",
+          color:"#B83030",
           fontSize:"12px", fontWeight:700, cursor:"pointer", transition:"all 0.14s",
         }}
-          onMouseEnter={e=>{e.currentTarget.style.background=isDark?"rgba(224,82,82,0.20)":"rgba(192,57,43,0.14)";e.currentTarget.style.borderColor=isDark?"rgba(224,82,82,0.55)":"rgba(192,57,43,0.50)";}}
-          onMouseLeave={e=>{e.currentTarget.style.background=isDark?"rgba(224,82,82,0.10)":"rgba(192,57,43,0.07)";e.currentTarget.style.borderColor=isDark?"rgba(224,82,82,0.28)":"rgba(192,57,43,0.25)";}}>
+          onMouseEnter={e=>{e.currentTarget.style.background="rgba(184,48,48,0.14)";e.currentTarget.style.borderColor="rgba(184,48,48,0.40)";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="rgba(184,48,48,0.07)";e.currentTarget.style.borderColor="rgba(184,48,48,0.20)";}}>
           <IcoOut/>
           <span className="logout-label">Log Out</span>
         </button>

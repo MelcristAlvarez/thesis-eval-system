@@ -8,8 +8,8 @@ import { facultyList, aiFeedbackMap, SEMESTER } from "../data/mockData.js";
 /* ─── Shared UI ─────────────────────────────────────── */
 function Card({ children, style={} }) {
   return (
-    <div style={{ background:"var(--bg-surface)", border:"1px solid var(--border)",
-      borderRadius:"var(--radius-md)", padding:"20px", boxShadow:"var(--shadow-sm)", ...style }}>
+    <div style={{ background:"#FFFFFF", border:"1.5px solid rgba(26,50,112,0.15)",
+      borderRadius:"var(--radius-md)", padding:"20px", boxShadow:"var(--shadow-card)", ...style }}>
       {children}
     </div>
   );
@@ -18,12 +18,12 @@ function ScoreBar({ score, max=5 }) {
   const pct = `${(score/max)*100}%`;
   return (
     <div style={{ width:"100%", height:"5px", background:"var(--border)", borderRadius:"99px", overflow:"hidden" }}>
-      <div style={{ width:pct, height:"100%", background:"var(--amber)", borderRadius:"99px", transition:"width 0.7s ease" }}/>
+      <div style={{ width:pct, height:"100%", background:"var(--gold)", borderRadius:"99px", transition:"width 0.7s ease" }}/>
     </div>
   );
 }
 function StatusChip({ status }) {
-  const map = { excellent:{l:"Excellent",c:"var(--success)"}, good:{l:"Good",c:"var(--amber)"},
+  const map = { excellent:{l:"Excellent",c:"var(--success)"}, good:{l:"Good",c:"var(--gold)"},
     average:{l:"Average",c:"var(--text-second)"}, needsSupport:{l:"Needs Support",c:"var(--danger)"} };
   const s = map[status]||map.average;
   return <span style={{ fontSize:"12px", fontWeight:700, color:s.c }}>{s.l}</span>;
@@ -39,11 +39,11 @@ function StarInput({ value, onChange }) {
         <button key={n} type="button" onClick={()=>onChange(n)}
           onMouseEnter={()=>setHover(n)} onMouseLeave={()=>setHover(0)}
           style={{ background:"none", border:"none", fontSize:"24px", lineHeight:1, cursor:"pointer",
-            color:n<=(hover||value)?"var(--amber)":"var(--border)",
+            color:n<=(hover||value)?"var(--gold)":"var(--border)",
             transform:hover===n?"scale(1.2)":"scale(1)", transition:"color 0.12s, transform 0.12s" }}>★</button>
       ))}
       {(hover||value)>0 && (
-        <span style={{ fontSize:"12px", color:"var(--amber)", fontWeight:600, marginLeft:"6px" }}>
+        <span style={{ fontSize:"12px", color:"var(--gold)", fontWeight:600, marginLeft:"6px" }}>
           {lbl[hover||value]}
         </span>
       )}
@@ -95,7 +95,7 @@ function Overview() {
             <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase",
               color:"var(--text-muted)", marginBottom:"10px" }}>{k.label}</p>
             <p style={{ fontFamily:"var(--font-display)", fontSize:"30px", fontWeight:600,
-              color:"var(--amber)", lineHeight:1, marginBottom:"4px" }}>{k.value}</p>
+              color:"var(--gold-darker)", lineHeight:1, marginBottom:"4px" }}>{k.value}</p>
             <p style={{ fontSize:"12px", color:"var(--text-muted)" }}>{k.sub}</p>
           </Card>
         ))}
@@ -108,7 +108,7 @@ function Overview() {
         <div className="tbl-wrap">
           <table style={{ width:"100%", borderCollapse:"collapse" }}>
             <thead>
-              <tr style={{ background:"var(--bg-elevated)" }}>
+              <tr style={{ background:"var(--bg-base)" }}>
                 {["Faculty","Subject / Code","Student","Chair","Composite","Status","Chair Eval"].map(h=>(
                   <th key={h} style={{ padding:"10px 14px", textAlign:"left", fontSize:"10px", fontWeight:700,
                     letterSpacing:"0.06em", textTransform:"uppercase", color:"var(--text-muted)",
@@ -120,7 +120,7 @@ function Overview() {
               {facultyList.map((f,i)=>(
                 <tr key={f.id}
                   style={{ borderBottom:i<facultyList.length-1?"1px solid var(--border)":"none", transition:"background 0.12s" }}
-                  onMouseEnter={e=>(e.currentTarget.style.background="var(--bg-elevated)")}
+                  onMouseEnter={e=>(e.currentTarget.style.background="var(--bg-base)")}
                   onMouseLeave={e=>(e.currentTarget.style.background="transparent")}>
                   <td style={{ padding:"12px 14px" }}>
                     <p style={{ fontSize:"13px", fontWeight:600 }}>{f.name}</p>
@@ -135,7 +135,7 @@ function Overview() {
                     {f.chairEvaluated ? f.chairScore.toFixed(2) : <span style={{ color:"var(--text-muted)", fontSize:"12px" }}>—</span>}
                   </td>
                   <td style={{ padding:"12px 14px", minWidth:"120px" }}>
-                    <p style={{ fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--amber)", marginBottom:"5px" }}>{f.compositeScore.toFixed(2)}</p>
+                    <p style={{ fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--gold)", marginBottom:"5px" }}>{f.compositeScore.toFixed(2)}</p>
                     <ScoreBar score={f.compositeScore}/>
                   </td>
                   <td style={{ padding:"12px 14px" }}><StatusChip status={f.status}/></td>
@@ -182,10 +182,10 @@ function ChairEvalTab() {
       <h3 style={{ fontSize:"18px", fontWeight:600, marginBottom:"8px" }}>Chair Evaluation Submitted</h3>
       <p style={{ fontSize:"13px", color:"var(--text-second)", maxWidth:"400px", margin:"0 auto 24px", lineHeight:1.7 }}>
         Your evaluation for <strong>{selected.name}</strong> has been recorded.
-        It carries a <strong style={{color:"var(--amber)"}}>30% weight</strong> in the final composite score.
+        It carries a <strong style={{color:"var(--gold)"}}>30% weight</strong> in the final composite score.
       </p>
       <button onClick={reset} style={{ padding:"10px 24px", borderRadius:"var(--radius-sm)",
-        background:"var(--amber)", color:"#0D0B06", fontWeight:700, fontSize:"13px", border:"none", cursor:"pointer" }}>
+        background:"var(--gold)", color:"var(--text-on-gold)", fontWeight:700, fontSize:"13px", border:"none", cursor:"pointer" }}>
         Evaluate Another →
       </button>
     </div>
@@ -194,12 +194,12 @@ function ChairEvalTab() {
   /* ── Faculty picker ─ */
   if (!selected) return (
     <div className="anim-fade-in">
-      <div style={{ padding:"14px 18px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)",
+      <div style={{ padding:"14px 18px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
         borderRadius:"var(--radius-md)", marginBottom:"20px" }}>
         <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.6 }}>
           Select a faculty member below to begin your structured classroom observation and
           performance evaluation. Your ratings carry a{" "}
-          <strong style={{color:"var(--amber)"}}>30% weight</strong> in the composite score.
+          <strong style={{color:"var(--gold)"}}>30% weight</strong> in the composite score.
         </p>
       </div>
 
@@ -213,19 +213,19 @@ function ChairEvalTab() {
               onClick={()=>{ setSelected(f); setRatings({}); setRemarks(""); setDone(false); }}
               style={{ display:"flex", alignItems:"center", gap:"14px", padding:"16px 20px",
                 cursor:"pointer", transition:"border-color 0.15s" }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--amber-border)";}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--gold-border)";}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";}}>
               <div style={{ width:"40px", height:"40px", borderRadius:"10px", flexShrink:0,
-                background:"var(--amber-dim)", border:"1px solid var(--amber-border)",
+                background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
                 display:"flex", alignItems:"center", justifyContent:"center",
-                fontFamily:"var(--font-display)", fontSize:"16px", color:"var(--amber)", fontWeight:700 }}>
+                fontFamily:"var(--font-display)", fontSize:"16px", color:"var(--gold)", fontWeight:700 }}>
                 {f.name.split(" ").slice(-1)[0][0]}
               </div>
               <div style={{ flex:1, minWidth:0 }}>
                 <p style={{ fontWeight:600, fontSize:"14px", marginBottom:"2px" }}>{f.name}</p>
                 <p style={{ fontSize:"12px", color:"var(--text-second)" }}>{f.dept} · {f.code} · {f.subject}</p>
                 <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"2px" }}>
-                  Student avg: <strong style={{color:"var(--amber)"}}>{f.studentScore.toFixed(2)}</strong> ({f.responses} responses)
+                  Student avg: <strong style={{color:"var(--gold)"}}>{f.studentScore.toFixed(2)}</strong> ({f.responses} responses)
                 </p>
               </div>
               <div style={{ textAlign:"right", flexShrink:0 }}>
@@ -269,13 +269,13 @@ function ChairEvalTab() {
 
       <Card>
         {/* Faculty header */}
-        <div style={{ padding:"14px 16px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)",
+        <div style={{ padding:"14px 16px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
           borderRadius:"var(--radius-sm)", marginBottom:"24px" }}>
           <p style={{ fontWeight:700, fontSize:"15px", marginBottom:"2px" }}>{selected.name}</p>
           <p style={{ fontSize:"12px", color:"var(--text-second)" }}>{selected.code} · {selected.subject} · {selected.dept}</p>
           <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"4px" }}>
-            Student avg: <strong style={{color:"var(--amber)"}}>{selected.studentScore.toFixed(2)}</strong>
-            {" "}({selected.responses} responses) &nbsp;·&nbsp; Chair weight: <strong style={{color:"var(--amber)"}}>30%</strong>
+            Student avg: <strong style={{color:"var(--gold)"}}>{selected.studentScore.toFixed(2)}</strong>
+            {" "}({selected.responses} responses) &nbsp;·&nbsp; Chair weight: <strong style={{color:"var(--gold)"}}>30%</strong>
           </p>
         </div>
 
@@ -284,11 +284,11 @@ function ChairEvalTab() {
           <div key={c.id} style={{ marginBottom:"26px", paddingBottom:"26px",
             borderBottom:ci<chairCriteria.length-1?"1px solid var(--border)":"none" }}>
             <div style={{ display:"flex", alignItems:"baseline", gap:"10px", marginBottom:"6px", flexWrap:"wrap" }}>
-              <p style={{ fontSize:"11px", fontWeight:700, color:"var(--amber)", letterSpacing:"0.06em", textTransform:"uppercase" }}>
+              <p style={{ fontSize:"11px", fontWeight:700, color:"var(--gold)", letterSpacing:"0.06em", textTransform:"uppercase" }}>
                 {c.category}
               </p>
-              <span style={{ fontSize:"10px", color:"var(--text-muted)", background:"var(--bg-elevated)",
-                border:"1px solid var(--border)", borderRadius:"4px", padding:"1px 7px", fontWeight:600 }}>
+              <span style={{ fontSize:"10px", color:"var(--text-muted)", background:"var(--bg-base)",
+                border:"1.5px solid rgba(26,50,112,0.15)", borderRadius:"4px", padding:"1px 7px", fontWeight:600 }}>
                 Weight: {c.weight}
               </span>
             </div>
@@ -312,9 +312,9 @@ function ChairEvalTab() {
             placeholder="Add professional observations, notable achievements, or specific areas for development..."
             rows={4}
             style={{ width:"100%", padding:"12px 14px", background:"var(--bg-input)",
-              border:"1px solid var(--border)", borderRadius:"var(--radius-sm)",
+              border:"1.5px solid rgba(26,50,112,0.15)", borderRadius:"var(--radius-sm)",
               color:"var(--text-primary)", fontSize:"13px", lineHeight:1.6, resize:"vertical" }}
-            onFocus={e=>(e.target.style.borderColor="var(--border-focus)")}
+            onFocus={e=>(e.target.style.borderColor="var(--gold-border)")}
             onBlur={e=>(e.target.style.borderColor="var(--border)")}/>
           <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"4px" }}>
             These remarks will be included in the AI feedback report and the audit trail.
@@ -332,11 +332,11 @@ function ChairEvalTab() {
         )}
         <button onClick={handleSubmit} disabled={!allRated} style={{
           width:"100%", padding:"13px", borderRadius:"var(--radius-sm)",
-          background:allRated?"var(--amber)":"rgba(245,166,35,0.20)",
+          background:allRated?"var(--gold)":"rgba(245,166,35,0.20)",
           color:allRated?"#0D0B06":"rgba(245,166,35,0.40)",
           fontSize:"13px", fontWeight:700, border:"none", cursor:allRated?"pointer":"not-allowed", transition:"all 0.2s" }}
-          onMouseEnter={e=>{if(allRated)e.currentTarget.style.background="var(--amber-hover)";}}
-          onMouseLeave={e=>{if(allRated)e.currentTarget.style.background="var(--amber)";}}>
+          onMouseEnter={e=>{if(allRated)e.currentTarget.style.background="var(--gold-deep)";}}
+          onMouseLeave={e=>{if(allRated)e.currentTarget.style.background="var(--gold)";}}>
           Submit Chair Evaluation (30% Weight) →
         </button>
       </Card>
@@ -350,10 +350,10 @@ function AIFeedbackTab() {
   const withFeedback = facultyList.filter(f=>aiFeedbackMap[f.id]&&f.chairEvaluated);
   return (
     <div className="anim-fade-in">
-      <div style={{ padding:"14px 18px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)",
+      <div style={{ padding:"14px 18px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
         borderRadius:"var(--radius-md)", marginBottom:"20px", display:"flex", alignItems:"center", gap:"10px" }}>
         <span className="anim-pulse" style={{ width:"8px", height:"8px", borderRadius:"50%",
-          background:"var(--amber)", display:"inline-block", flexShrink:0 }}/>
+          background:"var(--gold)", display:"inline-block", flexShrink:0 }}/>
         <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.5 }}>
           AI reports are available for faculty whose full evaluation cycle is complete.
           Reports are generated locally — no data leaves the university's servers.
@@ -374,7 +374,7 @@ function AIFeedbackTab() {
                   <div style={{ flex:1 }}>
                     <p style={{ fontWeight:600, fontSize:"14px", color:"var(--text-primary)", marginBottom:"2px" }}>{f.name}</p>
                     <p style={{ fontSize:"12px", color:"var(--text-second)" }}>
-                      {f.code} · Composite: <strong style={{color:"var(--amber)"}}>{f.compositeScore.toFixed(2)}</strong>
+                      {f.code} · Composite: <strong style={{color:"var(--gold)"}}>{f.compositeScore.toFixed(2)}</strong>
                     </p>
                   </div>
                   <span style={{ fontSize:"20px", color:"var(--text-muted)", transition:"transform 0.2s", transform:open?"rotate(180deg)":"rotate(0deg)" }}>⌄</span>
@@ -386,17 +386,17 @@ function AIFeedbackTab() {
                         <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--success)", marginBottom:"8px" }}>✦ Strengths</p>
                         {fb.strengths.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.strengths.length-1?"8px":0 }}>{s}</p>)}
                       </div>
-                      <div style={{ padding:"14px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--amber)", marginBottom:"8px" }}>◈ Points for Improvement</p>
+                      <div style={{ padding:"14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
+                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"8px" }}>◈ Points for Improvement</p>
                         {fb.improvements.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.improvements.length-1?"8px":0 }}>{s}</p>)}
                       </div>
                     </div>
-                    <div style={{ padding:"14px", background:"var(--bg-elevated)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)", marginBottom:"12px" }}>
+                    <div style={{ padding:"14px", background:"var(--bg-base)", border:"1.5px solid rgba(26,50,112,0.15)", borderRadius:"var(--radius-sm)", marginBottom:"12px" }}>
                       <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--text-muted)", marginBottom:"8px" }}>📌 Evidence (Student Responses)</p>
                       {fb.citations.map((c,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-muted)", fontStyle:"italic", lineHeight:1.6, paddingLeft:"12px", borderLeft:"2px solid var(--amber-border)", marginBottom:i<fb.citations.length-1?"8px":0 }}>{c}</p>)}
                     </div>
-                    <div style={{ padding:"14px", background:"var(--amber-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--amber)", marginBottom:"6px" }}>🎯 Recommendation</p>
+                    <div style={{ padding:"14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
+                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"6px" }}>🎯 Recommendation</p>
                       <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7 }}>{fb.recommendation}</p>
                     </div>
                   </div>
