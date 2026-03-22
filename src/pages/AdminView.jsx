@@ -52,8 +52,8 @@ function Overview() {
       >
         {[
           { label: "Faculty Evaluated", value: facultyList.length, icon: "👤", color: "#F59E0B" },
-          { label: "Total Responses",   value: totalResponses.toLocaleString(), icon: "📝", color: "#2DD4BF" },
-          { label: "Dept. Average",     value: avg,   icon: "📊", color: "#60A5FA" },
+          { label: "Total Responses", value: totalResponses.toLocaleString(), icon: "📝", color: "#2DD4BF" },
+          { label: "Dept. Average", value: avg, icon: "📊", color: "#60A5FA" },
           { label: "Reports Generated", value: `${facultyList.length}/${facultyList.length}`, icon: "🤖", color: "#22C55E" },
         ].map((k, i) => (
           <Card key={i} hoverable>
@@ -180,10 +180,10 @@ function Overview() {
                             f.compositeScore >= 4.5
                               ? "#22C55E"
                               : f.compositeScore >= 4.0
-                              ? "#F59E0B"
-                              : f.compositeScore >= 3.7
-                              ? "#60A5FA"
-                              : "#EF4444",
+                                ? "#F59E0B"
+                                : f.compositeScore >= 3.7
+                                  ? "#60A5FA"
+                                  : "#EF4444",
                         }}
                       >
                         {f.compositeScore.toFixed(2)}
@@ -196,10 +196,10 @@ function Overview() {
                           f.compositeScore >= 4.5
                             ? "#22C55E"
                             : f.compositeScore >= 4.0
-                            ? "#F59E0B"
-                            : f.compositeScore >= 3.7
-                            ? "#60A5FA"
-                            : "#EF4444"
+                              ? "#F59E0B"
+                              : f.compositeScore >= 3.7
+                                ? "#60A5FA"
+                                : "#EF4444"
                         }
                         height={4}
                       />
@@ -238,10 +238,10 @@ function Overview() {
 /* ── Reports sub-view ──────────────────────────────────── */
 function Reports() {
   const exports = [
-    { title: "CEAFA Semester Summary",  desc: "Composite scores and rankings for all evaluated faculty.", format: "PDF" },
+    { title: "CEAFA Semester Summary", desc: "Composite scores and rankings for all evaluated faculty.", format: "PDF" },
     { title: "AI Feedback Compilation", desc: "All AI-generated explainable reports in one document.", format: "PDF" },
-    { title: "Raw Evaluation Data",     desc: "Anonymized numerical ratings and text responses.", format: "CSV" },
-    { title: "Faculty Profile Update",  desc: "Structured data for integration with the HR system.", format: "JSON" },
+    { title: "Raw Evaluation Data", desc: "Anonymized numerical ratings and text responses.", format: "CSV" },
+    { title: "Faculty Profile Update", desc: "Structured data for integration with the HR system.", format: "JSON" },
   ];
 
   return (
@@ -362,8 +362,8 @@ export default function AdminView() {
 
   const views = [
     { key: "overview", label: "Overview" },
-    { key: "reports",  label: "Reports" },
-    { key: "audit",    label: "Audit Log" },
+    { key: "reports", label: "Reports" },
+    { key: "audit", label: "Audit Log" },
   ];
 
   return (
@@ -381,8 +381,8 @@ export default function AdminView() {
       </div>
 
       {subView === "overview" && <Overview />}
-      {subView === "reports"  && <Reports />}
-      {subView === "audit"    && <AuditLog />}
+      {subView === "reports" && <Reports />}
+      {subView === "audit" && <AuditLog />}
     </div>
   );
 }
