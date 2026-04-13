@@ -5,9 +5,9 @@ const pageTitles = {
   feedback: { title:"AI Feedback Reports",    sub:"Explainable AI-generated faculty feedback"         },
   reports:  { title:"Faculty Reports",        sub:"Evaluation results across all departments"         },
   audit:    { title:"Audit Log",              sub:"Traceable record of all AI-generated reports"      },
+  ratings:  { title:"My Ratings",             sub:"Your evaluation scores this semester"              },
 };
 
-// Gray/neutral icons
 const IcoMenu = () => (
   <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
     <path d="M3 12h18M3 6h18M3 18h18"/>
@@ -18,22 +18,9 @@ const IcoOut = () => (
     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
   </svg>
 );
-const IcoBell = () => (
-  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-  </svg>
-);
 
 export default function Header({ activeTab, onLogout, onMenuOpen }) {
   const meta = pageTitles[activeTab] || { title:"Faculty Evaluation System", sub:"UST–Legazpi" };
-
-  const iconBtn = {
-    width:"36px", height:"36px", borderRadius:"var(--radius-sm)",
-    background:"var(--bg-elevated)", border:"1px solid var(--border)",
-    color:"#7A8AAE",                    // neutral gray
-    display:"flex", alignItems:"center", justifyContent:"center",
-    cursor:"pointer", flexShrink:0, transition:"all 0.14s",
-  };
 
   return (
     <header style={{
@@ -46,35 +33,39 @@ export default function Header({ activeTab, onLogout, onMenuOpen }) {
       boxShadow:"0 2px 8px rgba(180,140,0,0.10)",
     }}>
 
-      {/* Left: hamburger + breadcrumb */}
+      {/* Left: hamburger (mobile only) + title */}
       <div style={{ display:"flex", alignItems:"center", gap:"12px", minWidth:0 }}>
-        <button className="hamburger" onClick={onMenuOpen} style={iconBtn}
+        {/* Hamburger — hidden on desktop via class, only visible on mobile */}
+        <button
+          className="hamburger"
+          onClick={onMenuOpen}
+          style={{
+            width:"36px", height:"36px", borderRadius:"var(--radius-sm)",
+            background:"var(--bg-elevated)", border:"1px solid var(--border)",
+            color:"#7A8AAE",
+            /* Do NOT set display here — let global.css control it */
+            alignItems:"center", justifyContent:"center",
+            cursor:"pointer", flexShrink:0, transition:"all 0.14s",
+          }}
           onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--gold-border)";e.currentTarget.style.color="var(--gold-darker)";}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(26,50,112,0.12)";e.currentTarget.style.color="#7A8AAE";}}>
+          onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="#7A8AAE";}}>
           <IcoMenu/>
         </button>
+
         <div style={{ minWidth:0 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-            <h1 style={{ fontFamily:"var(--font-display)", fontSize:"17px", fontWeight:600,
-              color:"var(--text-primary)", lineHeight:1.2,
-              whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.title}</h1>
-          </div>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:"17px", fontWeight:600,
+            color:"var(--text-primary)", lineHeight:1.2,
+            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.title}</h1>
           <p style={{ fontSize:"11.5px", color:"var(--text-muted)", marginTop:"1px",
             whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{meta.sub}</p>
         </div>
       </div>
 
-      {/* Right: notification + logout */}
-      <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
-        <button style={iconBtn}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--gold-border)";e.currentTarget.style.color="var(--gold-darker)";}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(26,50,112,0.12)";e.currentTarget.style.color="#7A8AAE";}}>
-          <IcoBell/>
-        </button>
-
+      {/* Right: logout only — bell removed */}
+      <div style={{ display:"flex", alignItems:"center", flexShrink:0 }}>
         <button onClick={onLogout} style={{
           display:"flex", alignItems:"center", gap:"7px",
-          padding:"8px 14px", borderRadius:"var(--radius-sm)",
+          padding:"8px 16px", borderRadius:"var(--radius-sm)",
           background:"rgba(184,48,48,0.07)",
           border:"1px solid rgba(184,48,48,0.20)",
           color:"#B83030",

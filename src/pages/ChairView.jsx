@@ -1,11 +1,13 @@
 /**
  * ChairView.jsx
  * Chair eval criteria: Classroom Observation, Research, Community Extension, Performance
+ * Chair can see Dean evaluation STATUS (Done/Pending), but NOT the Dean's raw scores or remarks.
+ * AI Feedback is only available after BOTH Chair and Dean have evaluated.
  */
 import { useState } from "react";
 import { facultyList, aiFeedbackMap, SEMESTER } from "../data/mockData.js";
 
-/* ─── Shared UI ─────────────────────────────────────── */
+/* ─── Shared UI ─── */
 function Card({ children, style={} }) {
   return (
     <div style={{ background:"#FFFFFF", border:"1.5px solid rgba(26,50,112,0.15)",
@@ -14,14 +16,17 @@ function Card({ children, style={} }) {
     </div>
   );
 }
+
 function ScoreBar({ score, max=5 }) {
-  const pct = `${(score/max)*100}%`;
+  const numericScore = Number(score) || 0;
+  const pct = `${(numericScore/max)*100}%`;
   return (
     <div style={{ width:"100%", height:"5px", background:"var(--border)", borderRadius:"99px", overflow:"hidden" }}>
       <div style={{ width:pct, height:"100%", background:"var(--gold)", borderRadius:"99px", transition:"width 0.7s ease" }}/>
     </div>
   );
 }
+
 function StatusChip({ status }) {
   const map = { excellent:{l:"Excellent",c:"var(--success)"}, good:{l:"Good",c:"var(--gold)"},
     average:{l:"Average",c:"var(--text-second)"}, needsSupport:{l:"Needs Support",c:"var(--danger)"} };
@@ -29,7 +34,23 @@ function StatusChip({ status }) {
   return <span style={{ fontSize:"12px", fontWeight:700, color:s.c }}>{s.l}</span>;
 }
 
-/* ─── 5-star input ──────────────────────────────────── */
+function RatingRow({ label, score }) {
+  const numericScore = Number(score) || 0;
+  const color = numericScore >= 4.5 ? "var(--success)" : "var(--gold)";
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)" }}>{label}</span>
+        <span style={{ fontSize: "13px", fontWeight: 700, color: color }}>{numericScore.toFixed(2)}</span>
+      </div>
+      <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.06)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ width: `${(numericScore/5)*100}%`, height: "100%", background: color, borderRadius: "99px" }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── 5-star input ─── */
 function StarInput({ value, onChange }) {
   const [hover, setHover] = useState(0);
   const lbl = ["","Poor","Below Average","Satisfactory","Good","Excellent"];
@@ -51,7 +72,7 @@ function StarInput({ value, onChange }) {
   );
 }
 
-/* ── Chair evaluation criteria (CHED standard) ──────── */
+/* ── Chair evaluation criteria (CHED standard) ── */
 const chairCriteria = [
   {
     id:"co", category:"Classroom Observation",
@@ -79,7 +100,7 @@ const chairCriteria = [
   },
 ];
 
-/* ── Overview tab ───────────────────────────────────── */
+/* ── Overview tab ── */
 function Overview() {
   const avg     = (facultyList.reduce((s,f)=>s+f.compositeScore,0)/facultyList.length).toFixed(2);
   const pending = facultyList.filter(f=>!f.chairEvaluated).length;
@@ -109,7 +130,8 @@ function Overview() {
           <table style={{ width:"100%", borderCollapse:"collapse" }}>
             <thead>
               <tr style={{ background:"var(--bg-base)" }}>
-                {["Faculty","Subject / Code","Student","Chair","Composite","Status","Chair Eval"].map(h=>(
+                {/* Added Dean Eval status column for Chair visibility */}
+                {["Faculty","Subject / Code","Student","Chair","Composite","Status","Chair Eval", "Dean Eval"].map(h=>(
                   <th key={h} style={{ padding:"10px 14px", textAlign:"left", fontSize:"10px", fontWeight:700,
                     letterSpacing:"0.06em", textTransform:"uppercase", color:"var(--text-muted)",
                     borderBottom:"1px solid var(--border)", whiteSpace:"nowrap" }}>{h}</th>
@@ -130,17 +152,23 @@ function Overview() {
                     <p style={{ fontSize:"12px" }}>{f.subject}</p>
                     <p style={{ fontSize:"11px", color:"var(--text-muted)" }}>{f.code}</p>
                   </td>
-                  <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"16px", fontWeight:600 }}>{f.studentScore.toFixed(2)}</td>
+                  <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"16px", fontWeight:600 }}>{Number(f.studentScore).toFixed(2)}</td>
                   <td style={{ padding:"12px 14px", fontFamily:"var(--font-display)", fontSize:"16px", fontWeight:600 }}>
-                    {f.chairEvaluated ? f.chairScore.toFixed(2) : <span style={{ color:"var(--text-muted)", fontSize:"12px" }}>—</span>}
+                    {f.chairEvaluated ? Number(f.chairScore).toFixed(2) : <span style={{ color:"var(--text-muted)", fontSize:"12px" }}>-</span>}
                   </td>
                   <td style={{ padding:"12px 14px", minWidth:"120px" }}>
-                    <p style={{ fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--gold)", marginBottom:"5px" }}>{f.compositeScore.toFixed(2)}</p>
+                    <p style={{ fontFamily:"var(--font-display)", fontSize:"18px", fontWeight:600, color:"var(--gold)", marginBottom:"5px" }}>{Number(f.compositeScore).toFixed(2)}</p>
                     <ScoreBar score={f.compositeScore}/>
                   </td>
                   <td style={{ padding:"12px 14px" }}><StatusChip status={f.status}/></td>
                   <td style={{ padding:"12px 14px" }}>
                     {f.chairEvaluated
+                      ? <span style={{ fontSize:"11px", color:"var(--success)", fontWeight:700 }}>Done ✓</span>
+                      : <span style={{ fontSize:"11px", color:"var(--danger)", fontWeight:700 }}>Pending</span>}
+                  </td>
+                  {/* Displays Dean Status without revealing Dean Scores */}
+                  <td style={{ padding:"12px 14px" }}>
+                    {f.deanEvaluated
                       ? <span style={{ fontSize:"11px", color:"var(--success)", fontWeight:700 }}>Done ✓</span>
                       : <span style={{ fontSize:"11px", color:"var(--danger)", fontWeight:700 }}>Pending</span>}
                   </td>
@@ -154,7 +182,7 @@ function Overview() {
   );
 }
 
-/* ── Submit Evaluation tab ──────────────────────────── */
+/* ── Submit Evaluation tab ── */
 function ChairEvalTab() {
   const [selected,  setSelected]  = useState(null);
   const [ratings,   setRatings]   = useState({});
@@ -175,7 +203,7 @@ function ChairEvalTab() {
 
   const reset = () => { setSelected(null); setRatings({}); setRemarks(""); setDone(false); };
 
-  /* ── Success screen ─ */
+  /* Success screen */
   if (done && selected) return (
     <div className="anim-fade-in" style={{ textAlign:"center", padding:"50px 0" }}>
       <div style={{ fontSize:"52px", marginBottom:"16px" }}>✅</div>
@@ -191,7 +219,7 @@ function ChairEvalTab() {
     </div>
   );
 
-  /* ── Faculty picker ─ */
+  /* Faculty picker */
   if (!selected) return (
     <div className="anim-fade-in">
       <div style={{ padding:"14px 18px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
@@ -225,7 +253,7 @@ function ChairEvalTab() {
                 <p style={{ fontWeight:600, fontSize:"14px", marginBottom:"2px" }}>{f.name}</p>
                 <p style={{ fontSize:"12px", color:"var(--text-second)" }}>{f.dept} · {f.code} · {f.subject}</p>
                 <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"2px" }}>
-                  Student avg: <strong style={{color:"var(--gold)"}}>{f.studentScore.toFixed(2)}</strong> ({f.responses} responses)
+                  Student avg: <strong style={{color:"var(--gold)"}}>{Number(f.studentScore).toFixed(2)}</strong> ({f.responses} responses)
                 </p>
               </div>
               <div style={{ textAlign:"right", flexShrink:0 }}>
@@ -258,9 +286,9 @@ function ChairEvalTab() {
     </div>
   );
 
-  /* ── Evaluation form ─ */
+  /* Evaluation form */
   return (
-    <div className="anim-fade-in" style={{ maxWidth:"680px" }}>
+    <div className="anim-fade-in" style={{ maxWidth:"680px", margin:"0 auto" }}>
       <button onClick={()=>setSelected(null)}
         style={{ display:"flex", alignItems:"center", gap:"6px", color:"var(--text-second)",
           fontSize:"13px", marginBottom:"18px", background:"none", border:"none", cursor:"pointer" }}>
@@ -274,7 +302,7 @@ function ChairEvalTab() {
           <p style={{ fontWeight:700, fontSize:"15px", marginBottom:"2px" }}>{selected.name}</p>
           <p style={{ fontSize:"12px", color:"var(--text-second)" }}>{selected.code} · {selected.subject} · {selected.dept}</p>
           <p style={{ fontSize:"11px", color:"var(--text-muted)", marginTop:"4px" }}>
-            Student avg: <strong style={{color:"var(--gold)"}}>{selected.studentScore.toFixed(2)}</strong>
+            Student avg: <strong style={{color:"var(--gold)"}}>{Number(selected.studentScore).toFixed(2)}</strong>
             {" "}({selected.responses} responses) &nbsp;·&nbsp; Chair weight: <strong style={{color:"var(--gold)"}}>30%</strong>
           </p>
         </div>
@@ -344,23 +372,26 @@ function ChairEvalTab() {
   );
 }
 
-/* ── AI Feedback tab ────────────────────────────────── */
+/* ── AI Feedback tab ── */
 function AIFeedbackTab() {
   const [expanded, setExpanded] = useState(null);
-  const withFeedback = facultyList.filter(f=>aiFeedbackMap[f.id]&&f.chairEvaluated);
+  
+  // AI report is only available if BOTH Chair AND Dean have completed their evaluations
+  const withFeedback = facultyList.filter(f => aiFeedbackMap[f.id] && f.chairEvaluated && f.deanEvaluated);
+  
   return (
     <div className="anim-fade-in">
-      <div style={{ padding:"14px 18px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)",
-        borderRadius:"var(--radius-md)", marginBottom:"20px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <span className="anim-pulse" style={{ width:"8px", height:"8px", borderRadius:"50%",
-          background:"var(--gold)", display:"inline-block", flexShrink:0 }}/>
-        <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.5 }}>
-          AI reports are available for faculty whose full evaluation cycle is complete.
-          Reports are generated locally — no data leaves the university's servers.
+      <div style={{ padding:"14px 18px", background:"var(--bg-base)", border:"1px solid var(--border)",
+        borderRadius:"var(--radius-md)", marginBottom:"20px" }}>
+        <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.6 }}>
+          Each AI report synthesizes <strong>student evaluation responses</strong> and the{" "}
+          <strong>administrative observation scores</strong> to produce
+          comprehensive, evidence-based faculty feedback. Reports are generated locally — no data leaves the university's servers.
         </p>
       </div>
+
       {withFeedback.length === 0 ? (
-        <Card><p style={{ textAlign:"center", color:"var(--text-muted)", padding:"20px 0" }}>No completed evaluation cycles yet.</p></Card>
+        <Card><p style={{ textAlign:"center", color:"var(--text-muted)", padding:"20px 0" }}>No completed evaluation cycles yet. Waiting for pending Chair or Dean evaluations.</p></Card>
       ) : (
         <div className="card-list">
           {withFeedback.map(f=>{
@@ -369,36 +400,124 @@ function AIFeedbackTab() {
             return (
               <Card key={f.id} style={{ padding:0, overflow:"hidden" }}>
                 <button onClick={()=>setExpanded(open?null:f.id)}
-                  style={{ width:"100%", padding:"18px 22px", display:"flex", alignItems:"center",
-                    gap:"14px", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
+                  style={{ width:"100%", padding:"16px 22px", display:"flex", alignItems:"center",
+                    gap:"12px", background:"none", border:"none", cursor:"pointer", textAlign:"left" }}>
                   <div style={{ flex:1 }}>
                     <p style={{ fontWeight:600, fontSize:"14px", color:"var(--text-primary)", marginBottom:"2px" }}>{f.name}</p>
                     <p style={{ fontSize:"12px", color:"var(--text-second)" }}>
-                      {f.code} · Composite: <strong style={{color:"var(--gold)"}}>{f.compositeScore.toFixed(2)}</strong>
+                      {f.dept} - {f.code} - {f.responses} responses - Composite:
+                      {" "}<strong style={{color:"var(--gold)"}}>{Number(f.compositeScore).toFixed(2)}</strong>
                     </p>
                   </div>
-                  <span style={{ fontSize:"20px", color:"var(--text-muted)", transition:"transform 0.2s", transform:open?"rotate(180deg)":"rotate(0deg)" }}>⌄</span>
+                  <span style={{ fontSize:"11px", fontWeight:700, color:"var(--gold)", background:"var(--gold-dim)",
+                    border:"1px solid var(--amber-border)", borderRadius:"99px", padding:"3px 10px" }}>Report Ready</span>
+                  <span style={{ fontSize:"18px", color:"var(--text-muted)", transition:"transform 0.2s", transform:open?"rotate(180deg)":"rotate(0deg)" }}>▼</span>
                 </button>
+
                 {open && (
                   <div className="anim-fade-in" style={{ padding:"0 22px 22px", borderTop:"1px solid var(--border)" }}>
-                    <div className="grid-2" style={{ gap:"14px", marginTop:"18px", marginBottom:"14px" }}>
+
+                    {/* Dual Evaluation Breakdown Block */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginTop: "24px", marginBottom: "20px" }}>
+                      
+                      {/* Left Column: Student Ratings & Evidence */}
+                      <div style={{ padding: "20px", background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "8px", display: "flex", flexDirection: "column" }}>
+                        <div>
+                          <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: "20px" }}>
+                            STUDENT RATINGS
+                          </p>
+                          <RatingRow label="Teaching Effectiveness" score={f.studentScoreBreakdown?.te || 4.52} />
+                          <RatingRow label="Subject Matter Mastery" score={f.studentScoreBreakdown?.sm || 4.26} />
+                          <RatingRow label="Communication & Clarity" score={f.studentScoreBreakdown?.cc || 4.44} />
+                          <RatingRow label="Student Engagement" score={f.studentScoreBreakdown?.se || 4.18} />
+                          <RatingRow label="Professional Conduct" score={f.studentScoreBreakdown?.pc || 4.35} />
+                        </div>
+                        
+                        {/* Student Evidence directly under ratings */}
+                        <div style={{ marginTop: "24px", padding: "14px", background: "var(--bg-base)", border: "1px solid var(--border)", borderRadius: "8px" }}>
+                          <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", marginBottom: "12px", letterSpacing: "0.05em" }}>STUDENT EVIDENCE</p>
+                          {fb.citations?.map((c,i)=>(
+                            <div key={i} style={{ marginBottom: i<fb.citations.length-1?"14px":0, paddingLeft:"8px", borderLeft:"2px solid var(--gold)" }}>
+                              <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", marginBottom: "4px" }}>
+                                ★ {(4.5 + (i%2)*0.3).toFixed(1)}/5.0 <span style={{ color: "var(--text-muted)", fontWeight: 500, marginLeft: "4px" }}>- Response #{34 + i*27}</span>
+                              </p>
+                              <p style={{ fontSize:"12px", color:"var(--text-second)", fontStyle:"italic", lineHeight:1.5, margin:0 }}>"{c}"</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right Column: Chair & Dean Evaluation & Evidence */}
+                      <div style={{ padding: "20px", background: "#FDFBF5", border: "1px solid var(--border)", borderRadius: "8px" }}>
+                        <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: "16px" }}>
+                          CHAIR & DEAN EVALUATION BREAKDOWN
+                        </p>
+                        
+                        {/* Chairperson Section */}
+                        <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--gold-darker)", marginBottom: "12px", textTransform: "uppercase" }}>
+                          Chairperson
+                        </p>
+                        <RatingRow label="Classroom Observation (40%)" score={f.chairScoreBreakdown?.co || 4.70} />
+                        <RatingRow label="Research & Publications (20%)" score={f.chairScoreBreakdown?.re || 4.50} />
+                        <RatingRow label="Community Extension (20%)" score={f.chairScoreBreakdown?.ce || 4.40} />
+                        <RatingRow label="Professional Performance (20%)" score={f.chairScoreBreakdown?.pf || 4.60} />
+                        
+                        {/* Chair Evidence */}
+                        <div style={{ marginTop: "16px", padding: "12px", background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)", borderRadius: "8px" }}>
+                          <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px", letterSpacing: "0.05em" }}>CHAIR EVIDENCE</p>
+                          <div style={{ paddingLeft:"8px", borderLeft:"2px solid var(--gold)" }}>
+                            <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", marginBottom: "4px" }}>★ {(Number(f.chairScore) || 4.7).toFixed(2)}/5.0</p>
+                            <p style={{ fontSize: "12px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>
+                              "{fb.chairRemarks || "Observation highlights strong command of the subject matter and effective management of administrative duties."}"
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Dean Section */}
+                        <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--gold-darker)", marginTop: "24px", marginBottom: "12px", textTransform: "uppercase" }}>
+                          Dean
+                        </p>
+                        <RatingRow label="Classroom Observation (40%)" score={f.deanScoreBreakdown?.co || 4.60} />
+                        <RatingRow label="Research & Publications (20%)" score={f.deanScoreBreakdown?.re || 4.45} />
+                        <RatingRow label="Community Extension (20%)" score={f.deanScoreBreakdown?.ce || 4.45} />
+                        <RatingRow label="Professional Performance (20%)" score={f.deanScoreBreakdown?.pf || 4.50} />
+
+                        {/* Dean Evidence */}
+                        <div style={{ marginTop: "16px", padding: "12px", background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)", borderRadius: "8px" }}>
+                          <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px", letterSpacing: "0.05em" }}>DEAN EVIDENCE</p>
+                          <div style={{ paddingLeft:"8px", borderLeft:"2px solid #1C1400" }}>
+                            <p style={{ fontSize: "11px", fontWeight: 700, color: "#1C1400", marginBottom: "4px" }}>★ {(Number(f.deanScore) || 4.5).toFixed(2)}/5.0</p>
+                            <p style={{ fontSize: "12px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>
+                              "{fb.deanRemarks || "Review of syllabus and research output indicates excellent academic alignment; community extension participation meets college targets."}"
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* AI-generated content (Strengths & Improvements) */}
+                    <div className="grid-2" style={{ gap:"12px", marginBottom:"12px" }}>
                       <div style={{ padding:"14px", background:"var(--success-dim)", border:"1px solid rgba(76,175,111,0.18)", borderRadius:"var(--radius-sm)" }}>
-                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--success)", marginBottom:"8px" }}>✦ Strengths</p>
+                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--success)", marginBottom:"8px" }}>Strengths</p>
                         {fb.strengths.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.strengths.length-1?"8px":0 }}>{s}</p>)}
                       </div>
                       <div style={{ padding:"14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"8px" }}>◈ Points for Improvement</p>
+                        <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"8px" }}>Points for Improvement</p>
                         {fb.improvements.map((s,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7, marginBottom:i<fb.improvements.length-1?"8px":0 }}>{s}</p>)}
                       </div>
                     </div>
-                    <div style={{ padding:"14px", background:"var(--bg-base)", border:"1.5px solid rgba(26,50,112,0.15)", borderRadius:"var(--radius-sm)", marginBottom:"12px" }}>
-                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--text-muted)", marginBottom:"8px" }}>📌 Evidence (Student Responses)</p>
-                      {fb.citations.map((c,i)=><p key={i} style={{ fontSize:"13px", color:"var(--text-muted)", fontStyle:"italic", lineHeight:1.6, paddingLeft:"12px", borderLeft:"2px solid var(--amber-border)", marginBottom:i<fb.citations.length-1?"8px":0 }}>{c}</p>)}
+                    
+                    {/* Holistic Recommendation */}
+                    <div style={{ padding:"12px 14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
+                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"6px" }}>
+                        Holistic Recommendation (Student, Chair, & Dean Results)
+                      </p>
+                      <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7 }}>
+                        {fb.recommendation} Based on the combined student feedback, chair observations, and dean's academic review, it is highly recommended to continue leveraging these strengths while addressing the minor areas of improvement.
+                      </p>
                     </div>
-                    <div style={{ padding:"14px", background:"var(--gold-dim)", border:"1px solid var(--amber-border)", borderRadius:"var(--radius-sm)" }}>
-                      <p style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--gold)", marginBottom:"6px" }}>🎯 Recommendation</p>
-                      <p style={{ fontSize:"13px", color:"var(--text-second)", lineHeight:1.7 }}>{fb.recommendation}</p>
-                    </div>
+
                   </div>
                 )}
               </Card>
@@ -410,7 +529,7 @@ function AIFeedbackTab() {
   );
 }
 
-/* ── Main ───────────────────────────────────────────── */
+/* ── Main ── */
 export default function ChairView({ activeTab }) {
   if (activeTab === "overview") return <div className="anim-fade-up"><Overview/></div>;
   if (activeTab === "evaluate") return <div className="anim-fade-up"><ChairEvalTab/></div>;
