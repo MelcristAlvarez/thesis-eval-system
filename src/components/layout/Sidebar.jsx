@@ -1,19 +1,14 @@
-// Corrected relative path: up one level to 'components', then into 'logo'
 import logo from "../logo/UST-Legazpi_Seal.png";
-
-/**
- * Sidebar — dark charcoal #1C1400 background matching official ust-legazpi.edu.ph
- * expanded navigation menu. Gold top accent bar (#F2B800). No navy anywhere.
- */
 
 const navConfig = {
   dean: [
     { key:"overview",  label:"College Overview",   sub:"Faculty performance"  },
+    { key:"evaluate",  label:"Submit Evaluation",  sub:"Dean evaluation"      },
     { key:"feedback",  label:"AI Feedback Reports",sub:"View AI summaries"    },
   ],
   faculty: [
-    { key:"ratings",   label:"My Ratings",         sub:"Your evaluation scores"},
-    { key:"feedback",  label:"My AI Feedback",      sub:"AI-generated report"  },
+    { key:"dashboard", label:"Dashboard",          sub:"Your evaluation scores"},
+    { key:"feedback",  label:"My AI Feedback",     sub:"AI-generated report"  },
   ],
   student: [
     { key:"evaluate", label:"Evaluate Faculty",  sub:"Submit evaluation"  },
@@ -33,7 +28,7 @@ const navConfig = {
 };
 
 const icons = {
-  ratings: (<svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>),
+  dashboard: (<svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>),
   evaluate: (<svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>),
   history:  (<svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>),
   overview: (<svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>),
@@ -55,17 +50,15 @@ export default function Sidebar({ user, activeTab, onNavigate, isOpen, onClose }
       <div className={`sidebar-overlay${isOpen?" active":""}`} onClick={onClose}/>
       <aside className={`sidebar${isOpen?" open":""}`}>
 
-        {/* ── Dark Header Bar ── */}
         <div style={{ 
-          background: "#1A1200", // Sleek dark charcoal background instead of gold
-          borderBottom: "1px solid rgba(242,184,0,0.15)", // Subtle gold border to separate it from the sidebar body
+          background: "#1A1200",
+          borderBottom: "1px solid rgba(242,184,0,0.15)",
           padding: "16px 18px",
           display: "flex", 
           alignItems: "center", 
           gap: "12px" 
         }}>
           
-          {/* Logo container: Transparent background, properly sized */}
           <div style={{ 
             width: "48px", 
             height: "48px", 
@@ -78,14 +71,13 @@ export default function Sidebar({ user, activeTab, onNavigate, isOpen, onClose }
           </div>
 
           <div>
-            <p style={{ fontSize:"14px", fontWeight:800, color:"#F2B800", lineHeight:1.2 }}>UST–Legazpi</p>
+            <p style={{ fontSize:"14px", fontWeight:800, color:"#F2B800", lineHeight:1.2 }}>UST-Legazpi</p>
             <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.55)", letterSpacing:"0.06em", textTransform:"uppercase", marginTop:"2px" }}>
               Faculty Evaluation Portal
             </p>
           </div>
         </div>
 
-        {/* User card */}
         <div style={{ padding:"16px 16px 0" }}>
           <div style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.10)",
             borderRadius:"10px", padding:"14px", marginBottom:"6px" }}>
@@ -116,7 +108,6 @@ export default function Sidebar({ user, activeTab, onNavigate, isOpen, onClose }
           </div>
         </div>
 
-        {/* Navigation */}
         <nav style={{ padding:"12px 12px", flex:1 }}>
           <p style={{ fontSize:"9.5px", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase",
             color:"rgba(255,255,255,0.28)", padding:"0 8px", marginBottom:"6px" }}>Navigation</p>
@@ -145,13 +136,12 @@ export default function Sidebar({ user, activeTab, onNavigate, isOpen, onClose }
           })}
         </nav>
 
-        {/* Semester status */}
         <div style={{ padding:"14px 20px", borderTop:"1px solid rgba(255,255,255,0.07)" }}>
           <div style={{ display:"flex", alignItems:"center", gap:"7px" }}>
             <span className="anim-pulse" style={{ width:"6px", height:"6px", borderRadius:"50%",
               background:"#2E9E5E", display:"inline-block", flexShrink:0 }}/>
             <span style={{ fontSize:"10px", color:"rgba(255,255,255,0.35)" }}>
-              2nd Sem · SY 2025–2026 · Open
+              2nd Sem / SY 2025 to 2026 / Open
             </span>
           </div>
         </div>

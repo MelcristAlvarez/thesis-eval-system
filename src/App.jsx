@@ -9,14 +9,15 @@ import Sidebar     from "./components/layout/Sidebar.jsx";
 import Header      from "./components/layout/Header.jsx";
 import Footer      from "./components/layout/Footer.jsx";
 
-const defaultTab = { student:"evaluate", chairperson:"overview", hr:"overview", dean:"overview", faculty:"ratings" };
+// Fixed the landing tab for faculty from "ratings" to "dashboard"
+const defaultTab = { student:"evaluate", chairperson:"overview", hr:"overview", dean:"overview", faculty:"dashboard" };
 
 export default function App() {
   const [user,     setUser]     = useState(null);
   const [tab,      setTab]      = useState("");
   const [sideOpen, setSideOpen] = useState(false);
 
-  // Always light mode — remove any leftover dark class
+  // Always light mode, remove any leftover dark class
   useEffect(() => {
     document.documentElement.classList.remove("light");
     document.documentElement.classList.remove("dark");
@@ -29,7 +30,15 @@ export default function App() {
   }, []);
 
   const login  = (u) => { setUser(u); setTab(defaultTab[u.role] || "overview"); };
-  const logout = ()  => { setUser(null); setTab(""); setSideOpen(false); };
+  
+  // Logout function now strictly clears the LocalStorage data
+  const logout = ()  => { 
+      setUser(null); 
+      setTab(""); 
+      setSideOpen(false); 
+      localStorage.clear(); // Wipes all mock data evaluated so far
+  };
+  
   const nav    = (k) => { setTab(k); setSideOpen(false); };
 
   if (!user) return <Login onLogin={login}/>;

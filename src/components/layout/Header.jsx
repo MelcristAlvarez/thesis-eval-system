@@ -5,7 +5,7 @@ const pageTitles = {
   feedback: { title:"AI Feedback Reports",    sub:"Explainable AI-generated faculty feedback"         },
   reports:  { title:"Faculty Reports",        sub:"Evaluation results across all departments"         },
   audit:    { title:"Audit Log",              sub:"Traceable record of all AI-generated reports"      },
-  ratings:  { title:"My Ratings",             sub:"Your evaluation scores this semester"              },
+  dashboard: { title:"Faculty Dashboard", sub:"Your evaluation scores this semester" },
 };
 
 const IcoMenu = () => (

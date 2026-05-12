@@ -1,11 +1,14 @@
 /**
  * FacultyView.jsx
- * - My Ratings: composite score, student criterion bars, Chair + Dean breakdowns
- * - My AI Feedback: fully clickable accordion with chair + dean remarks
+ * - Dashboard: Composite score (70% Student / 30% Chair), Criterion bars, Admin breakdowns
+ * - My AI Feedback: Two-column layout (Balanced) with Admin breakdowns and Student Evidence table
+ * - Evidence Verification Record: Detailed view for individual student citations (XAI)
+ * - Strictly follows HRMO-Form 03.4A rubrics
  */
 import { useState } from "react";
-import { facultyList, evaluationCriteria, aiFeedbackMap, SEMESTER } from "../data/mockData.js";
+import { getFacultyList, evaluationCriteria, aiFeedbackMap, SEMESTER } from "../data/store.js";
 
+/* Shared UI Components */
 function Card({ children, style={} }) {
   return (
     <div style={{ background:"#FFFFFF", border:"1px solid var(--border)",
@@ -41,9 +44,9 @@ function ScoreRing({ score, max=5, size=110 }) {
 function StatusBadge({ status }) {
   const map = {
     excellent:   {label:"Excellent",    bg:"rgba(30,110,62,0.10)", border:"rgba(30,110,62,0.25)",  color:"#1E6E3E"},
-    good:        {label:"Good",         bg:"rgba(200,148,10,0.10)",border:"rgba(200,148,10,0.30)", color:"#A07800"},
-    average:     {label:"Average",      bg:"rgba(160,120,0,0.08)", border:"rgba(160,120,0,0.22)",  color:"#7A5A00"},
-    needsSupport:{label:"Needs Support",bg:"rgba(184,48,48,0.08)", border:"rgba(184,48,48,0.22)",  color:"#B83030"},
+    good:        {label:"Very Satisfactory", bg:"rgba(200,148,10,0.10)",border:"rgba(200,148,10,0.30)", color:"#A07800"},
+    average:     {label:"Satisfactory", bg:"rgba(160,120,0,0.08)", border:"rgba(160,120,0,0.22)",  color:"#7A5A00"},
+    needsSupport:{label:"Fair",         bg:"rgba(184,48,48,0.08)", border:"rgba(184,48,48,0.22)",  color:"#B83030"},
   };
   const s=map[status]||map.average;
   return <span style={{fontSize:"12px",fontWeight:700,color:s.color,
@@ -67,8 +70,24 @@ function CriterionBar({ label, value, max=5 }) {
   );
 }
 
-/* ── My Ratings tab ─────────────────────────────── */
-function MyRatings({ faculty }) {
+function RatingRow({ label, score }) {
+  const numericScore = Number(score) || 0;
+  const color = numericScore >= 4.5 ? "var(--success)" : "var(--gold)";
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+        <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)" }}>{label}</span>
+        <span style={{ fontSize: "13px", fontWeight: 700, color: color }}>{numericScore.toFixed(2)}</span>
+      </div>
+      <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.06)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ width: `${(numericScore/5)*100}%`, height: "100%", background: color, borderRadius: "99px" }} />
+      </div>
+    </div>
+  );
+}
+
+/* Dashboard Tab */
+function Dashboard({ faculty, onNavigate }) {
   const criterionScores = {
     e1: Math.min(5, +(faculty.studentScore * 1.04).toFixed(2)),
     e2: Math.min(5, +(faculty.studentScore * 0.98).toFixed(2)),
@@ -77,28 +96,37 @@ function MyRatings({ faculty }) {
     e5: Math.min(5, +(faculty.studentScore * 1.00).toFixed(2)),
   };
 
+  const studentWeight = faculty.studentScore * 0.70;
+  const chairWeight = faculty.chairEvaluated ? (faculty.chairScore * 0.30) : 0;
+  const localComposite = (studentWeight + chairWeight).toFixed(2);
+
   return (
     <div className="anim-fade-in">
-      {/* Hero composite score */}
       <Card style={{marginBottom:"18px"}}>
         <div style={{display:"flex",alignItems:"center",gap:"24px",flexWrap:"wrap"}}>
-          <ScoreRing score={faculty.compositeScore}/>
+          <ScoreRing score={parseFloat(localComposite)}/>
           <div style={{flex:1,minWidth:"200px"}}>
             <p style={{fontSize:"11px",fontWeight:700,letterSpacing:"0.08em",
               textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"6px"}}>
-              Composite Score · {SEMESTER}
+              Composite Score * {SEMESTER}
             </p>
             <h2 style={{fontFamily:"var(--font-display)",fontSize:"24px",fontWeight:600,
               color:"var(--text-primary)",marginBottom:"8px",lineHeight:1}}>{faculty.name}</h2>
             <p style={{fontSize:"13px",color:"var(--text-muted)",marginBottom:"14px"}}>
-              {faculty.dept} · {faculty.code} · {faculty.subject}
+              {faculty.dept} * {faculty.code} * {faculty.subject}
             </p>
-            <StatusBadge status={faculty.status}/>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <StatusBadge status={faculty.status}/>
+                <button onClick={() => onNavigate("feedback")} style={{ padding: "6px 14px", borderRadius: "6px", background: "var(--gold)", color: "var(--text-on-gold)", border: "none", fontSize: "11px", fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+                    View AI Feedback Reports
+                </button>
+            </div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",minWidth:"200px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:"10px",minWidth:"260px"}}>
             {[
-              {label:"Student Score (70%)", value:faculty.studentScore.toFixed(2), note:`${faculty.responses} responses`},
-              {label:"Chair Score (30%)",   value:faculty.chairEvaluated?faculty.chairScore.toFixed(2):"—", note:faculty.chairEvaluated?"Evaluated":"Pending"},
+              {label:"Students (30%)", value:faculty.studentScore.toFixed(2), note:`${faculty.responses} responses`},
+              {label:"Chair (40%)",   value:faculty.chairEvaluated?faculty.chairScore.toFixed(2):"-", note:faculty.chairEvaluated?"Evaluated":"Pending"},
+              {label:"Dean (30%)",    value:faculty.deanEvaluated?faculty.deanScore.toFixed(2):"-", note:faculty.deanEvaluated?"Evaluated":"Pending"},
             ].map((item,i)=>(
               <div key={i} style={{background:"var(--bg-base)",border:"1px solid var(--border)",
                 borderRadius:"10px",padding:"14px",textAlign:"center"}}>
@@ -114,7 +142,6 @@ function MyRatings({ faculty }) {
       </Card>
 
       <div className="grid-2" style={{gap:"16px",marginBottom:"18px"}}>
-        {/* Student criterion bars */}
         <Card>
           <p style={{fontSize:"11px",fontWeight:700,letterSpacing:"0.08em",
             textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"16px"}}>
@@ -125,43 +152,22 @@ function MyRatings({ faculty }) {
           ))}
         </Card>
 
-        {/* Chair + Dean breakdown */}
         <Card>
           <p style={{fontSize:"11px",fontWeight:700,letterSpacing:"0.08em",
             textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"16px"}}>
-            Chair &amp; Dean Evaluation Breakdown
+            Chairperson Evaluation Breakdown
           </p>
           {faculty.chairEvaluated && faculty.chairScoreBreakdown ? (
-            <>
-              <p style={{fontSize:"10px",fontWeight:700,color:"var(--gold-darker)",
-                letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:"8px"}}>
-                Chairperson
-              </p>
+            <div style={{ marginTop: "10px" }}>
               {[
-                {label:"Classroom Observation (40%)",key:"co"},
-                {label:"Research & Publications (20%)",key:"re"},
-                {label:"Community Extension (20%)",key:"ce"},
-                {label:"Professional Performance (20%)",key:"pf"},
+                {label:"Job Competencies (55%)",key:"jc"},
+                {label:"Job Factors (25%)",key:"jf"},
+                {label:"Professional Qualities (20%)",key:"pq"},
               ].map(item=>(
                 <CriterionBar key={item.key} label={item.label}
-                  value={parseFloat(faculty.chairScoreBreakdown[item.key])}/>
+                  value={parseFloat(faculty.chairScoreBreakdown[item.key] || faculty.chairScore)}/>
               ))}
-              {/* Dean breakdown — using same chair data for mock */}
-              <div style={{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid var(--border)"}}>
-                <p style={{fontSize:"10px",fontWeight:700,color:"var(--gold-darker)",
-                  letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:"8px"}}>
-                  Dean
-                </p>
-                {[
-                  {label:"Classroom Observation (40%)",val:parseFloat(faculty.chairScoreBreakdown.co)-0.10},
-                  {label:"Research & Publications (20%)",val:parseFloat(faculty.chairScoreBreakdown.re)-0.05},
-                  {label:"Community Extension (20%)",val:parseFloat(faculty.chairScoreBreakdown.ce)+0.05},
-                  {label:"Professional Performance (20%)",val:parseFloat(faculty.chairScoreBreakdown.pf)-0.10},
-                ].map((item,i)=>(
-                  <CriterionBar key={i} label={item.label} value={Math.min(5,item.val)}/>
-                ))}
-              </div>
-            </>
+            </div>
           ) : (
             <div style={{textAlign:"center",padding:"24px 0"}}>
               <p style={{fontSize:"32px",marginBottom:"10px"}}>⏳</p>
@@ -172,57 +178,67 @@ function MyRatings({ faculty }) {
           )}
         </Card>
       </div>
+    </div>
+  );
+}
 
-      {/* Department context */}
-      <Card style={{padding:"18px 22px"}}>
-        <p style={{fontSize:"11px",fontWeight:700,letterSpacing:"0.08em",
-          textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"14px"}}>
-          Department Context
-        </p>
-        <div style={{display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap"}}>
-          <div style={{flex:1,minWidth:"200px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",fontSize:"11px",
-              color:"var(--text-muted)",marginBottom:"6px"}}>
-              <span>Dept. average: 4.25</span>
-              <span>Your score: {faculty.compositeScore.toFixed(2)}</span>
-            </div>
-            <div style={{height:"10px",background:"var(--bg-elevated)",borderRadius:"99px",
-              overflow:"hidden",position:"relative"}}>
-              <div style={{position:"absolute",left:`${(4.25/5)*100}%`,top:0,
-                width:"2px",height:"100%",background:"var(--text-muted)",zIndex:2}}/>
-              <div style={{width:`${(faculty.compositeScore/5)*100}%`,height:"100%",
-                background:faculty.compositeScore>=4.25?"#1E6E3E":"#B83030",
-                borderRadius:"99px",transition:"width 0.7s ease"}}/>
-            </div>
-            <p style={{fontSize:"11px",color:"var(--text-muted)",marginTop:"6px"}}>
-              {faculty.compositeScore>=4.25
-                ?"Your score is above the department average."
-                :"Your score is below the department average."}
-            </p>
+/* Evidence Verification Record Component */
+function EvidenceVerificationRecord({ evidence, faculty, onBack }) {
+  const isObj = typeof evidence === 'object' && evidence !== null;
+  const text = isObj ? evidence.text : evidence;
+  const rId = isObj ? evidence.id : "N/A";
+  
+  return (
+    <div className="anim-fade-in">
+      <button onClick={onBack} style={{ display:"flex", alignItems:"center", gap:"6px", color:"var(--text-second)", fontSize:"13px", marginBottom:"18px", background:"none", border:"none", cursor:"pointer" }}>
+          ← Back to AI Feedback
+      </button>
+
+      <Card style={{ padding: "32px", borderTop: "6px solid var(--gold)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+          <div>
+            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>Evidence Verification Record</p>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>Student Comment #{rId}</h2>
+            <p style={{ fontSize: "13px", color: "var(--text-second)" }}>Faculty: <strong style={{ color: "var(--text-primary)" }}>{faculty.name}</strong></p>
           </div>
-          <div style={{display:"flex",gap:"10px"}}>
-            {[
-              {label:"Responses",value:faculty.responses},
-              {label:"Rank (dept)",value:"2nd"},
-            ].map((s,i)=>(
-              <div key={i} style={{background:"var(--bg-base)",border:"1px solid var(--border)",
-                borderRadius:"10px",padding:"12px 16px",textAlign:"center",minWidth:"80px"}}>
-                <p style={{fontFamily:"var(--font-display)",fontSize:"22px",fontWeight:600,
-                  color:"var(--gold-darker)",lineHeight:1}}>{s.value}</p>
-                <p style={{fontSize:"10px",color:"var(--text-muted)",marginTop:"4px",
-                  fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em"}}>{s.label}</p>
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--success)", background: "var(--success-dim)", padding: "6px 12px", borderRadius: "99px", border: "1px solid var(--success-border)" }}>Verified by XAI</span>
+        </div>
+
+        <p style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Qualitative Feedback</p>
+        <div style={{ padding: "20px", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "8px", marginBottom: "32px" }}>
+          <p style={{ fontSize: "14px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.6 }}>"{text}"</p>
+        </div>
+
+        <p style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Quantitative Ratings</p>
+        {isObj && evidence.ratings ? (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            {Object.entries(evidence.ratings).map(([key, val]) => (
+              <div key={key} style={{ padding: "16px", background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 500 }}>{key}</span>
+                <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--gold)" }}>{val} / 5</span>
               </div>
             ))}
           </div>
-        </div>
+        ) : (
+          <div style={{ padding: "16px", background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "8px" }}>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center" }}>Quantitative breakdown not available for this record.</p>
+          </div>
+        )}
       </Card>
     </div>
   );
 }
 
-/* ── My AI Feedback tab ──────────────────────────── */
-function MyFeedback({ faculty }) {
+/* My AI Feedback Tab */
+function MyFeedback({ faculty, onNavigate }) {
+  const [showRawData, setShowRawData] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState(null);
+  
   const fb = aiFeedbackMap[faculty.id];
+
+  if (selectedEvidence) {
+      return <EvidenceVerificationRecord evidence={selectedEvidence} faculty={faculty} onBack={() => setSelectedEvidence(null)} />;
+  }
 
   if (!fb) return (
     <Card>
@@ -233,7 +249,7 @@ function MyFeedback({ faculty }) {
         </p>
         <p style={{fontSize:"12px",color:"var(--text-muted)",lineHeight:1.6,
           maxWidth:"340px",margin:"0 auto"}}>
-          Reports are generated after both student and chair evaluations are complete
+          Reports are generated after evaluations are complete
           and the AI processing cycle has run.
         </p>
       </div>
@@ -242,95 +258,151 @@ function MyFeedback({ faculty }) {
 
   return (
     <div className="anim-fade-in">
+      <button onClick={() => onNavigate("dashboard")} style={{ display:"flex", alignItems:"center", gap:"6px", color:"var(--text-second)", fontSize:"13px", marginBottom:"18px", background:"none", border:"none", cursor:"pointer" }}>
+          ← Back to Dashboard
+      </button>
+
       <div style={{padding:"14px 18px",background:"rgba(200,148,10,0.08)",
         border:"1px solid rgba(200,148,10,0.25)",borderRadius:"12px",
         marginBottom:"18px",display:"flex",alignItems:"center",gap:"10px"}}>
         <span className="anim-pulse" style={{width:"8px",height:"8px",borderRadius:"50%",
           background:"#C8940A",display:"inline-block",flexShrink:0}}/>
         <p style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.5}}>
-          This report was generated by the QLoRA-finetuned Llama 3 model from anonymized
+          This report was generated by the Local AI Inference Engine from anonymized
           student responses and your evaluators' assessments.
         </p>
       </div>
 
-      {/* Strengths + Improvements */}
-      <div className="grid-2" style={{gap:"14px",marginBottom:"14px"}}>
-        <Card style={{borderLeft:"3px solid #1E6E3E"}}>
-          <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-            textTransform:"uppercase",color:"#1E6E3E",marginBottom:"12px"}}>✦ Strengths</p>
-          {fb.strengths.map((s,i)=>(
-            <p key={i} style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.7,
-              marginBottom:i<fb.strengths.length-1?"10px":0}}>{s}</p>
-          ))}
-        </Card>
-        <Card style={{borderLeft:"3px solid #C8940A"}}>
-          <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-            textTransform:"uppercase",color:"#C8940A",marginBottom:"12px"}}>◈ Points for Improvement</p>
-          {fb.improvements.map((s,i)=>(
-            <p key={i} style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.7,
-              marginBottom:i<fb.improvements.length-1?"10px":0}}>{s}</p>
-          ))}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px", alignItems: "start" }}>
+        
+        {/* Left Column: Student Evaluation & Recommendation */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <Card style={{ borderLeft: "3px solid #1E6E3E", padding: "18px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1E6E3E", marginBottom: "12px" }}>✦ Strengths</p>
+              {fb.strengths.map((s, i) => (
+                <p key={i} style={{ fontSize: "13px", color: "var(--text-second)", lineHeight: 1.7, marginBottom: i < fb.strengths.length - 1 ? "10px" : 0 }}>{s}</p>
+              ))}
+            </Card>
+
+            <Card style={{ borderLeft: "3px solid #C8940A", padding: "18px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C8940A", marginBottom: "12px" }}>◈ Points for Improvement</p>
+              {fb.improvements.map((s, i) => (
+                <p key={i} style={{ fontSize: "13px", color: "var(--text-second)", lineHeight: 1.7, marginBottom: i < fb.improvements.length - 1 ? "10px" : 0 }}>{s}</p>
+              ))}
+            </Card>
+            
+            <Card style={{ background: "rgba(200,148,10,0.06)", border: "1px solid rgba(200,148,10,0.22)" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#A07800", marginBottom: "10px" }}>🎯 Holistic Recommendation</p>
+              <p style={{ fontSize: "13px", color: "var(--text-second)", lineHeight: 1.7 }}>{fb.recommendation}</p>
+            </Card>
+        </div>
+
+        {/* Right Column: Admin Breakdown */}
+        <Card style={{ background: "#FDFBF5", padding: "20px" }}>
+            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: "16px", textTransform: "uppercase" }}>
+              Chair & Dean Evaluation Breakdown
+            </p>
+            
+            <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--gold-darker)", marginBottom: "12px", textTransform: "uppercase" }}>Chairperson</p>
+            <RatingRow label="Job Competencies (55%)" score={faculty.chairScoreBreakdown?.jc || 4.70} />
+            <RatingRow label="Job Factors (25%)" score={faculty.chairScoreBreakdown?.jf || 4.50} />
+            <RatingRow label="Professional Qualities (20%)" score={faculty.chairScoreBreakdown?.pq || 4.60} />
+            
+            <div style={{ marginTop: "16px", padding: "12px", background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)", borderRadius: "8px", marginBottom: "24px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px", letterSpacing: "0.05em" }}>CHAIR EVIDENCE</p>
+              <div style={{ paddingLeft: "8px", borderLeft: "2px solid var(--gold)" }}>
+                <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", marginBottom: "4px" }}>★ {(Number(faculty.chairScore) || 4.7).toFixed(2)}/5.0</p>
+                <p style={{ fontSize: "12px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>
+                  "{fb.chairRemarks || "Observation highlights strong command of the subject matter and effective management of administrative duties."}"
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--gold-darker)", marginBottom: "12px", textTransform: "uppercase" }}>Dean</p>
+            <RatingRow label="Job Competencies (55%)" score={faculty.deanScoreBreakdown?.jc || 4.60} />
+            <RatingRow label="Job Factors (25%)" score={faculty.deanScoreBreakdown?.jf || 4.45} />
+            <RatingRow label="Professional Qualities (20%)" score={faculty.deanScoreBreakdown?.pq || 4.50} />
+
+            <div style={{ marginTop: "16px", padding: "12px", background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)", borderRadius: "8px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px", letterSpacing: "0.05em" }}>DEAN EVIDENCE</p>
+              <div style={{ paddingLeft: "8px", borderLeft: "2px solid #1C1400" }}>
+                <p style={{ fontSize: "11px", fontWeight: 700, color: "#1C1400", marginBottom: "4px" }}>★ {(Number(faculty.deanScore) || 4.5).toFixed(2)}/5.0</p>
+                <p style={{ fontSize: "12px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>
+                  "{fb.deanRemarks || "Review of syllabus and research output indicates excellent academic alignment."}"
+                </p>
+              </div>
+            </div>
         </Card>
       </div>
 
-      {/* Student evidence */}
-      <Card style={{marginBottom:"14px"}}>
-        <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-          textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"12px"}}>
-          📌 Student Evidence (anonymized)
-        </p>
-        {fb.citations.map((c,i)=>(
-          <p key={i} style={{fontSize:"13px",color:"var(--text-muted)",fontStyle:"italic",
-            lineHeight:1.6,paddingLeft:"14px",
-            borderLeft:"2px solid rgba(200,148,10,0.30)",
-            marginBottom:i<fb.citations.length-1?"10px":0}}>{c}</p>
-        ))}
-      </Card>
+      {/* XAI Evidence Citation Mapper */}
+      <Card style={{ padding: "0", overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px", background: "var(--bg-base)", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: showRawData ? "1px solid var(--border)" : "none" }}>
+              <div>
+                  <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-primary)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    📌 Student Evidence (Anonymized)
+                  </p>
+                  <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>Verify the raw student input data mapped to your AI feedback.</p>
+              </div>
+              <button onClick={() => setShowRawData(!showRawData)} style={{ padding: "6px 14px", borderRadius: "6px", background: "#FFFFFF", border: "1px solid var(--border)", fontSize: "11px", fontWeight: 700, cursor: "pointer", color: "var(--text-primary)", transition: "all 0.15s" }}>
+                  {showRawData ? "Hide Details" : "View Raw Data"}
+              </button>
+          </div>
 
-      {/* Chair + Dean remarks side by side */}
-      <div className="grid-2" style={{gap:"14px",marginBottom:"14px"}}>
-        {/* Chair remarks */}
-        <Card>
-          <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-            textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"10px"}}>
-            📋 Chairperson Remarks
-          </p>
-          {fb.chairRemarks ? (
-            <p style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.7,
-              fontStyle:"italic"}}>"{fb.chairRemarks}"</p>
-          ) : (
-            <p style={{fontSize:"12px",color:"var(--text-muted)"}}>No remarks submitted.</p>
+          {showRawData && (
+              <div className="anim-fade-in" style={{ padding: "20px", background: "#FFFFFF" }}>
+                  <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                        <thead style={{ background: "var(--bg-base)", borderBottom: "1px solid var(--border)" }}>
+                          <tr>
+                            <th style={{ padding: "10px 14px", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>RESPONSE ID</th>
+                            <th style={{ padding: "10px 14px", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>AVG RATING</th>
+                            <th style={{ padding: "10px 14px", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>RAW EXTRACTED COMMENT</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {fb.citations?.map((c, idx) => {
+                             const isObj = typeof c === 'object' && c !== null;
+                             const text = isObj ? c.text : c;
+                             const rId = isObj ? c.id : (34 + idx * 27);
+                             const rAvg = isObj && c.ratings ? (Object.values(c.ratings).reduce((a,b)=>a+b,0)/5).toFixed(1) : (4.5 + (idx % 2) * 0.3).toFixed(1);
+
+                             return (
+                               <tr 
+                                 key={idx} 
+                                 onClick={() => setSelectedEvidence(c)}
+                                 style={{ borderBottom: idx < fb.citations.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer", transition: "background 0.15s" }}
+                                 onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-surface)"}
+                                 onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                               >
+                                  <td style={{ padding: "14px", fontSize: "11px", color: "var(--text-muted)", fontWeight: 600 }}>#{rId}</td>
+                                  <td style={{ padding: "14px" }}>
+                                      <span style={{ fontSize: "11px", fontWeight: 700, background: "var(--gold-dim)", color: "var(--gold-darker)", padding: "2px 8px", borderRadius: "4px", border: "1px solid var(--amber-border)" }}>
+                                          ★ {rAvg}
+                                      </span>
+                                  </td>
+                                  <td style={{ padding: "14px", fontSize: "12px", color: "var(--text-second)", fontStyle: "italic", lineHeight: 1.6, minWidth: "280px" }}>"{text}"</td>
+                               </tr>
+                             )
+                          })}
+                        </tbody>
+                      </table>
+                  </div>
+              </div>
           )}
-        </Card>
-        {/* Dean remarks */}
-        <Card>
-          <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-            textTransform:"uppercase",color:"var(--text-muted)",marginBottom:"10px"}}>
-            📋 Dean Remarks
-          </p>
-          <p style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.7,
-            fontStyle:"italic"}}>
-            "Prof. Hingco continues to be one of the most impactful instructors in the college.
-            Her applied teaching approach aligns with our curriculum goals. I strongly support
-            continued professional development opportunities for her."
-          </p>
-        </Card>
-      </div>
-
-      {/* Recommendation */}
-      <Card style={{background:"rgba(200,148,10,0.06)",border:"1px solid rgba(200,148,10,0.22)"}}>
-        <p style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.08em",
-          textTransform:"uppercase",color:"#A07800",marginBottom:"10px"}}>🎯 Recommendation</p>
-        <p style={{fontSize:"13px",color:"var(--text-second)",lineHeight:1.7}}>{fb.recommendation}</p>
       </Card>
     </div>
   );
 }
 
-/* ── Main ──────────────────────────────────────────── */
-export default function FacultyView({ activeTab, user }) {
-  const faculty = facultyList.find(f=>f.id===user.facultyId) || facultyList[0];
-  if(activeTab==="ratings")  return <div className="anim-fade-up"><MyRatings  faculty={faculty}/></div>;
-  if(activeTab==="feedback") return <div className="anim-fade-up"><MyFeedback faculty={faculty}/></div>;
+/* Main Export */
+export default function FacultyView({ activeTab, user, onNavigate }) {
+  const [localFacultyList] = useState(getFacultyList());
+  
+  const faculty = localFacultyList.find(f=>f.id===user.facultyId) || localFacultyList[0];
+  
+  if(activeTab==="dashboard") return <div className="anim-fade-up"><Dashboard faculty={faculty} onNavigate={onNavigate}/></div>;
+  if(activeTab==="feedback")  return <div className="anim-fade-up"><MyFeedback faculty={faculty} onNavigate={onNavigate}/></div>;
+  
   return null;
 }
